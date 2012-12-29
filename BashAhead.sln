@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Web
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BashAhead", "BashAhead\BashAhead.fsproj", "{1E894F85-C1A7-4C6A-B808-BE64EB8C9F6D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1E894F85-C1A7-4C6A-B808-BE64EB8C9F6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E894F85-C1A7-4C6A-B808-BE64EB8C9F6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E894F85-C1A7-4C6A-B808-BE64EB8C9F6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E894F85-C1A7-4C6A-B808-BE64EB8C9F6D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
