@@ -32,9 +32,9 @@ let adapt f op =
     StateOp(fun state ->
     let mutableState = ref state
     let op2 x =
-        let (monster, newState) = run (op x) !mutableState
+        let (rOp, newState) = run (op x) !mutableState
         mutableState := newState
-        monster
+        rOp
     (f op2, !mutableState))
 
 type StateBuilder() =
@@ -57,8 +57,8 @@ type StateBuilder() =
     member x.Zero() =
         StateOp(fun state ->
         ((), state))
-    member x.For(l, f) =
-        adapt (fun op -> Seq.iter op l) f
+    member x.For(s, f) =
+        adapt (fun op -> Seq.iter op s) f
     member x.Delay(f) = f ()
 
 let stateM = StateBuilder()
