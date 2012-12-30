@@ -4,10 +4,10 @@ open Actors
 open State
 
 let getActions =
-    StateOp(fun state ->
-    match state.hero with
-    | Some h -> ([ Attack(h, 2) ], state)
-    | _ -> ([], state))
+    stateM {
+        let! hero = getHero
+        return [ Attack(hero.id, 2) ]
+    }
 let applyAction action =
     stateM {
         return
