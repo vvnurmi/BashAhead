@@ -14,18 +14,16 @@ let applyAction action =
             match action with
             | Attack(target, power) -> [ GetHit(target, power) ]
     }
-let rec applyChanges changes =
+let applyChange change =
     stateM {
-        match changes with
-        | GetHit(victimId, power) :: tail ->
+        match change with
+        | GetHit(victimId, power) ->
             let! victim = getCreature victimId
             do! setCreature victimId { victim with hitpoints = victim.hitpoints - power }
-            return! applyChanges tail
-        | [] -> return ()
     }
 let updateState =
     stateM {
         let! actions = getActions
         let! changes = adapt (fun op -> List.collect op actions) applyAction
-        do! applyChanges changes
+        do! adapt (fun op -> List.iter op changes) applyChange
     }
