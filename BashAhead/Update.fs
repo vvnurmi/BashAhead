@@ -19,11 +19,24 @@ let applyChange change =
         match change with
         | GetHit(victimId, power) ->
             let! victim = getCreature victimId
-            do! setCreature victimId { victim with hitpoints = victim.hitpoints - power }
+            let newHitpoints = victim.hitpoints - power
+            do! setCreature victimId { victim with hitpoints = newHitpoints }
+            return if newHitpoints <= 0 then [ Die(victimId) ] else []
+        | Die(victimId) ->
+            let! cType = identify victimId
+            match cType with
+            | Hero -> do! setGameOver "You died!"
+            | Monster -> do! removeMonster victimId
+            return []
+    }
+let rec applyChanges changes =
+    stateM {
+        let! changes = adapt (fun op -> List.collect op changes) applyChange
+        if not changes.IsEmpty then return! applyChanges changes
     }
 let updateState =
     stateM {
         let! actions = getActions
         let! changes = adapt (fun op -> List.collect op actions) applyAction
-        do! adapt (fun op -> List.iter op changes) applyChange
+        do! applyChanges changes
     }

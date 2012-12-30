@@ -40,9 +40,15 @@ let rec uiLoop () =
         let! monsters = getMonsters
         do for m in monsters do showCreature m
         do! updateState
-        match Console.ReadLine() with
-        | "q" -> return ()
-        | _ -> return! uiLoop ()
+        let! gameOver = getGameOver
+        if gameOver <> null then
+            printfn "Game over. %s" gameOver
+            Console.ReadLine () |> ignore
+            return ()
+        else
+            match Console.ReadLine() with
+            | "q" -> return ()
+            | _ -> return! uiLoop ()
     }
 
 let main =

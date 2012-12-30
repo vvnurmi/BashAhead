@@ -11,3 +11,7 @@ type Action =
     | Attack of CreatureId * int
 type Change =
     | GetHit of CreatureId * int
+    | Die of CreatureId
+type CreatureType =
+    | Hero
+    | Monster
