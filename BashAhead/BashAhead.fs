@@ -42,11 +42,12 @@ let showState =
     }
 let getUserActions () =
     stateM {
-        printfn "Thrust, Quit?"
+        printfn "Thrust, Swing, Quit?"
         let command = Console.ReadLine().PadRight(1).Substring(0, 1).ToLowerInvariant()
         return!
             match command with
             | "t" -> attackWeakest
+            | "s" -> attackAll
             | "q" -> ret [ Quit ]
             | _ -> ret []
     }

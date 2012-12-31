@@ -46,6 +46,11 @@ let attackWeakest =
         let! monsters = getMonsters
         return
             match (List.sortBy (fun m -> m.hitpoints) monsters) with
-            | weakest :: _ -> [ Attack(weakest.id, 2) ]
+            | weakest :: _ -> [ Attack(weakest.id, 3) ]
             | _ -> []
+    }
+let attackAll =
+    stateM {
+        let! monsters = getMonsters
+        return List.map (fun m -> Attack(m.id, 2)) monsters
     }
