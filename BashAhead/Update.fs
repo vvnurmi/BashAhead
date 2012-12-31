@@ -3,7 +3,7 @@
 open Actors
 open State
 
-let getActions =
+let getGameActions =
     stateM {
         let! hero = getHero
         return [ Attack(hero.id, 2) ]
@@ -13,6 +13,7 @@ let applyAction action =
         return
             match action with
             | Attack(target, power) -> [ GetHit(target, power) ]
+            | Quit -> failwith "Quit"
     }
 let applyChange change =
     stateM {
@@ -34,9 +35,17 @@ let rec applyChanges changes =
         let! changes = adapt (fun op -> List.collect op changes) applyChange
         if not changes.IsEmpty then return! applyChanges changes
     }
-let updateState =
+let updateState actions =
     stateM {
-        let! actions = getActions
         let! changes = adapt (fun op -> List.collect op actions) applyAction
         do! applyChanges changes
+    }
+
+let attackWeakest =
+    stateM {
+        let! monsters = getMonsters
+        return
+            match (List.sortBy (fun m -> m.hitpoints) monsters) with
+            | weakest :: _ -> [ Attack(weakest.id, 2) ]
+            | _ -> []
     }

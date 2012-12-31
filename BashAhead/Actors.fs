@@ -9,6 +9,7 @@ type Creature = {
 }
 type Action =
     | Attack of CreatureId * int
+    | Quit
 type Change =
     | GetHit of CreatureId * int
     | Die of CreatureId

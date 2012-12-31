@@ -26,6 +26,9 @@ let getNewId =
 let run m state =
     match m with
     | StateOp f -> f state
+let ret a =
+    StateOp(fun state ->
+    (a, state))
 let lift f gOp =
     StateOp(fun state ->
     let (gResult, state2) = run gOp state
@@ -51,8 +54,7 @@ type StateBuilder() =
         let (rg, state3) = run mg state2
         (rg, state3))
     member x.Return(a) =
-        StateOp(fun state ->
-        (a, state))
+        ret a
     member x.ReturnFrom(mf) =
         StateOp(fun state ->
         run mf state)

@@ -34,23 +34,41 @@ let createHero =
 let showCreature c =
     printfn "%s (%i/%i)" c.name c.hitpoints c.maxhitpoints
 
-let rec uiLoop () =
+let showState =
     stateM {
         do! lift showCreature getHero
         let! monsters = getMonsters
-        do for m in monsters do showCreature m
-        do! updateState
+        for m in monsters do showCreature m
+    }
+let getUserActions () =
+    stateM {
+        printfn "Thrust, Quit?"
+        let command = Console.ReadLine().PadRight(1).Substring(0, 1).ToLowerInvariant()
+        return!
+            match command with
+            | "t" -> attackWeakest
+            | "q" -> ret [ Quit ]
+            | _ -> ret []
+    }
+let rec frameStep actions =
+    stateM {
+        do! updateState actions
         let! gameOver = getGameOver
         if gameOver <> null then
             printfn "Game over. %s" gameOver
             Console.ReadLine () |> ignore
             return ()
         else
-            match Console.ReadLine() with
-            | "q" -> return ()
-            | _ -> return! uiLoop ()
+            return! uiLoop ()
     }
-
+and uiLoop () =
+    stateM {
+        do! showState
+        let! userActions = getUserActions ()
+        if not (List.exists (fun a -> a = Quit) userActions) then
+            let! gameActions = getGameActions
+            do! frameStep (userActions @ gameActions)
+    }
 let main =
     stateM {
         let! hero = createHero
