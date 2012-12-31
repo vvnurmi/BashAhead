@@ -3,10 +3,15 @@
 open Actors
 open State
 
-let getGameActions =
+let getMonsterActions m =
     stateM {
         let! hero = getHero
         return [ Attack(hero.id, 2) ]
+    }
+let getGameActions =
+    stateM {
+        let! monsters = getMonsters
+        return! adapt (fun op -> List.collect op monsters) getMonsterActions
     }
 let applyAction action =
     stateM {
