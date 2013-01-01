@@ -6,7 +6,8 @@ open State
 let getMonsterActions m =
     stateM {
         let! hero = getHero
-        return [ Attack(hero.id, 2<hp>) ]
+        let weapon = Map.find m.weaponName Library.weapons
+        return [ Attack(hero.id, weapon.power) ]
     }
 let getGameActions =
     stateM {
@@ -48,14 +49,18 @@ let updateState actions =
 
 let attackWeakest =
     stateM {
+        let! hero = getHero
+        let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         return
             match (List.sortBy (fun m -> m.hitpoints) monsters) with
-            | weakest :: _ -> [ Attack(weakest.id, 3<hp>) ]
+            | weakest :: _ -> [ Attack(weakest.id, weapon.power) ]
             | _ -> []
     }
 let attackAll =
     stateM {
+        let! hero = getHero
+        let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
-        return List.map (fun m -> Attack(m.id, 2<hp>)) monsters
+        return List.map (fun m -> Attack(m.id, weapon.power * 2 / 3)) monsters
     }

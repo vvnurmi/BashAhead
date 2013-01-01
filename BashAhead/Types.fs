@@ -4,6 +4,7 @@
 
 type Weapon = {
     name : string;
+    power : int<hp>;
 }
 type CreatureId = int
 type Creature = {
