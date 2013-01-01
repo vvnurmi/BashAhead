@@ -48,7 +48,8 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actors.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Library.fs" />
     <Compile Include="State.fs" />
     <Compile Include="Update.fs" />
     <Compile Include="BashAhead.fs" />

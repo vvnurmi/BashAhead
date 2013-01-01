@@ -1,23 +1,23 @@
 ﻿module BA
 
 open System
-open Actors
+open Types
 open State
 open Update
 
 let state = stateUnit
 let random = System.Random()
-let chooseOne (list : List<string>) = list.[random.Next(list.Length)]
+let chooseOne (list : string []) = list.[random.Next(list.Length)]
 
 let createMonster =
     stateM {
         let! id = getNewId
         return {
             id = id;
-            name = chooseOne ["orc"; "goblin"; "wolf"];
+            name = chooseOne [| "orc"; "goblin"; "wolf" |];
             maxhitpoints = 12<hp>;
             hitpoints = 12<hp>;
-            weapon = chooseOne ["bow"; "sword"; "fangs"];
+            weaponName = chooseOne (Array.map (fun (name, w) -> name) (Map.toArray Library.weapons));
         }
     }
 let createHero =
@@ -28,12 +28,12 @@ let createHero =
             name = "Hero";
             maxhitpoints = 42<hp>;
             hitpoints = 42<hp>;
-            weapon = "sword";
+            weaponName = "sword";
         }
     }
 
 let showCreature c =
-    printfn "%s (%i/%i) armed with %s" c.name (int c.hitpoints) (int c.maxhitpoints) c.weapon
+    printfn "%s (%i/%i) armed with %s" c.name (int c.hitpoints) (int c.maxhitpoints) c.weaponName
 
 let showState =
     stateM {

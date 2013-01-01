@@ -1,14 +1,17 @@
-﻿module Actors
+﻿module Types
 
 [<Measure>] type hp
 
+type Weapon = {
+    name : string;
+}
 type CreatureId = int
 type Creature = {
     id : CreatureId;
     name : string;
     maxhitpoints : int<hp>;
     hitpoints : int<hp>;
-    weapon : string;
+    weaponName : string;
 }
 type Action =
     | Attack of CreatureId * int<hp>

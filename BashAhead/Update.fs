@@ -1,6 +1,6 @@
 ﻿module Update
 
-open Actors
+open Types
 open State
 
 let getMonsterActions m =

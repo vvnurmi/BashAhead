@@ -1,6 +1,6 @@
 ﻿module State
 
-open Actors
+open Types
 
 type StateT = {
     nextId : int;
