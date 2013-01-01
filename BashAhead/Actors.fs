@@ -8,6 +8,7 @@ type Creature = {
     name : string;
     maxhitpoints : int<hp>;
     hitpoints : int<hp>;
+    weapon : string;
 }
 type Action =
     | Attack of CreatureId * int<hp>

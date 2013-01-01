@@ -9,15 +9,15 @@ let state = stateUnit
 let random = System.Random()
 let chooseOne (list : List<string>) = list.[random.Next(list.Length)]
 
-let monsterNames = ["orc"; "goblin"; "wolf"]
 let createMonster =
     stateM {
         let! id = getNewId
         return {
             id = id;
-            name = chooseOne monsterNames;
+            name = chooseOne ["orc"; "goblin"; "wolf"];
             maxhitpoints = 12<hp>;
             hitpoints = 12<hp>;
+            weapon = chooseOne ["bow"; "sword"; "fangs"];
         }
     }
 let createHero =
@@ -28,11 +28,12 @@ let createHero =
             name = "Hero";
             maxhitpoints = 42<hp>;
             hitpoints = 42<hp>;
+            weapon = "sword";
         }
     }
 
 let showCreature c =
-    printfn "%s (%i/%i)" c.name (int c.hitpoints) (int c.maxhitpoints)
+    printfn "%s (%i/%i) armed with %s" c.name (int c.hitpoints) (int c.maxhitpoints) c.weapon
 
 let showState =
     stateM {
