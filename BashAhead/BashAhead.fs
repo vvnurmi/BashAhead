@@ -16,8 +16,8 @@ let createMonster =
         return {
             id = id;
             name = chooseOne monsterNames;
-            maxhitpoints = 12;
-            hitpoints = 12;
+            maxhitpoints = 12<hp>;
+            hitpoints = 12<hp>;
         }
     }
 let createHero =
@@ -26,13 +26,13 @@ let createHero =
         return {
             id = id;
             name = "Hero";
-            maxhitpoints = 42;
-            hitpoints = 42;
+            maxhitpoints = 42<hp>;
+            hitpoints = 42<hp>;
         }
     }
 
 let showCreature c =
-    printfn "%s (%i/%i)" c.name c.hitpoints c.maxhitpoints
+    printfn "%s (%i/%i)" c.name (int c.hitpoints) (int c.maxhitpoints)
 
 let showState =
     stateM {

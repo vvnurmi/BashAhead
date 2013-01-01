@@ -6,7 +6,7 @@ open State
 let getMonsterActions m =
     stateM {
         let! hero = getHero
-        return [ Attack(hero.id, 2) ]
+        return [ Attack(hero.id, 2<hp>) ]
     }
 let getGameActions =
     stateM {
@@ -27,7 +27,7 @@ let applyChange change =
             let! victim = getCreature victimId
             let newHitpoints = victim.hitpoints - power
             do! setCreature victimId { victim with hitpoints = newHitpoints }
-            return if newHitpoints <= 0 then [ Die(victimId) ] else []
+            return if newHitpoints <= 0<hp> then [ Die(victimId) ] else []
         | Die(victimId) ->
             let! cType = identify victimId
             match cType with
@@ -51,11 +51,11 @@ let attackWeakest =
         let! monsters = getMonsters
         return
             match (List.sortBy (fun m -> m.hitpoints) monsters) with
-            | weakest :: _ -> [ Attack(weakest.id, 3) ]
+            | weakest :: _ -> [ Attack(weakest.id, 3<hp>) ]
             | _ -> []
     }
 let attackAll =
     stateM {
         let! monsters = getMonsters
-        return List.map (fun m -> Attack(m.id, 2)) monsters
+        return List.map (fun m -> Attack(m.id, 2<hp>)) monsters
     }

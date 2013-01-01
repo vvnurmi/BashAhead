@@ -81,7 +81,7 @@ let identify id =
         return if isHero then Hero else Monster
     }
 let isDead c =
-    c.hitpoints <= 0
+    c.hitpoints <= 0<hp>
 let getCreature id =
     getState (fun state -> Map.find id state.creatures)
 let setCreature id c =
