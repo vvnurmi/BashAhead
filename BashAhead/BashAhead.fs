@@ -33,19 +33,16 @@ let createHero =
     }
 
 let showCreature c =
-    let showHitpoints hp hpMax =
-        match hp with
-        | x when x > hpMax -> printfc "Brilliant\t" Color.White
-        | x when x = hpMax -> printfc "Ok\t" Color.Green
-        | x when x > hpMax / 2 -> printfc "Wounded\t" Color.Yellow
-        | x when x > 0<hp> -> printfc "Critical\t" Color.Red
-        | _ -> printfc "Dead\t" Color.DarkGray
-    let showProperties weapon =
-        printfc (sprintf "[%s]\t" weapon) Color.Gray
-    printfc (c.name + "\t") Color.Gray
-    showHitpoints c.hitpoints c.maxhitpoints
-    showProperties c.weaponName
-    printfc "\n" Color.Gray
+    let nameElem = c.name, Color.Gray
+    let hpElem =
+        match c.hitpoints with
+        | x when x > c.maxhitpoints -> "Brilliant", Color.White
+        | x when x = c.maxhitpoints -> "Ok", Color.Green
+        | x when x > c.maxhitpoints / 2 -> "Wounded", Color.Yellow
+        | x when x > 0<hp> -> "Critical", Color.Red
+        | _ -> "Dead", Color.DarkGray
+    let propertyElem = sprintf "[%s]" c.weaponName, Color.Gray
+    print [nameElem; hpElem; propertyElem]
 let showState =
     stateM {
         do! lift showCreature getHero

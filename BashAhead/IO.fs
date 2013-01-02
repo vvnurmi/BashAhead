@@ -13,3 +13,9 @@ let printfc str color =
     Console.ForegroundColor <- color
     printf "%s" str
     Console.ForegroundColor <- oldColor
+let rec print = function
+    | (s, c) :: tail ->
+        printfc (s + "\t") c
+        print tail
+    | [] ->
+        printfn ""
