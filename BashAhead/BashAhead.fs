@@ -33,15 +33,15 @@ let createHero =
     }
 
 let showCreature c =
-    let nameElem = c.name, Color.Gray
+    let nameElem = Str(c.name)
     let hpElem =
         match c.hitpoints with
-        | x when x > c.maxhitpoints -> "Brilliant", Color.White
-        | x when x = c.maxhitpoints -> "Ok", Color.Green
-        | x when x > c.maxhitpoints / 2 -> "Wounded", Color.Yellow
-        | x when x > 0<hp> -> "Critical", Color.Red
-        | _ -> "Dead", Color.DarkGray
-    let propertyElem = sprintf "[%s]" c.weaponName, Color.Gray
+        | x when x > c.maxhitpoints -> StrColor("Brilliant", Color.White)
+        | x when x = c.maxhitpoints -> StrColor("Ok", Color.Green)
+        | x when x > c.maxhitpoints / 2 -> StrColor("Wounded", Color.Yellow)
+        | x when x > 0<hp> -> StrColor("Critical", Color.Red)
+        | _ -> StrColor("Dead", Color.DarkGray)
+    let propertyElem = Str(sprintf "[%s]" c.weaponName)
     print [nameElem; hpElem; propertyElem]
 let showState =
     stateM {
