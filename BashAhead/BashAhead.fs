@@ -32,7 +32,7 @@ let createHero =
         }
     }
 
-let showCreature c =
+let formatCreature c =
     let nameElem = Str(c.name)
     let hpElem =
         match c.hitpoints with
@@ -42,16 +42,16 @@ let showCreature c =
         | x when x > 0<hp> -> StrColor("Critical", Color.Red)
         | _ -> StrColor("Dead", Color.DarkGray)
     let propertyElem = Str(sprintf "[%s]" c.weaponName)
-    print (Row([ nameElem; hpElem; propertyElem ]))
+    Row([ nameElem; hpElem; propertyElem ])
 let showState =
     stateM {
-        do! lift showCreature getHero
-        let! monsters = getMonsters
-        for m in monsters do showCreature m
+        let! heroRow = lift formatCreature getHero
+        let! monsterRows = lift (List.map formatCreature) getMonsters
+        printStatus (Table(heroRow :: monsterRows))
     }
 let getUserActions () =
     stateM {
-        print (StrColor("Thrust, Swing, Quit? ", Color.White))
+        printPrompt (StrColor("Thrust, Swing, Quit? ", Color.White))
         let command = getCommand ()
         return!
             match command with
@@ -65,7 +65,7 @@ let rec frameStep actions =
         do! updateState actions
         let! gameOver = getGameOver
         if gameOver <> null then
-            print (StrColor(sprintf "Game over. %s" gameOver, Color.White))
+            printPrompt (StrColor(sprintf "Game over. %s" gameOver, Color.White))
             promptUser ()
             return ()
         else
@@ -73,6 +73,7 @@ let rec frameStep actions =
     }
 and uiLoop () =
     stateM {
+        clear ()
         do! showState
         let! userActions = getUserActions ()
         if not (List.exists (fun a -> a = Quit) userActions) then
