@@ -33,7 +33,24 @@ let createHero =
     }
 
 let showCreature c =
-    printfn "%s (%i/%i) armed with %s" c.name (int c.hitpoints) (int c.maxhitpoints) c.weaponName
+    printf "%s\t" c.name
+    let printfc str color =
+        let oldColor = Console.ForegroundColor
+        Console.ForegroundColor <- color
+        printf str
+        Console.ForegroundColor <- oldColor
+    let showHitpoints hp hpMax =
+        match hp with
+        | x when x > hpMax -> printfc "Brilliant\t" ConsoleColor.White
+        | x when x = hpMax -> printfc "Ok\t" ConsoleColor.Green
+        | x when x > hpMax / 2 -> printfc "Wounded\t" ConsoleColor.Yellow
+        | x when x > 0<hp> -> printfc "Critical\t" ConsoleColor.Red
+        | _ -> printfc "Dead\t" ConsoleColor.DarkGray
+    let showProperties weapon =
+        printf "[%s]\t" weapon
+    showHitpoints c.hitpoints c.maxhitpoints
+    showProperties c.weaponName
+    printfn ""
 
 let showState =
     stateM {
