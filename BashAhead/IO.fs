@@ -11,5 +11,5 @@ let promptUser () =
 let printfc str color =
     let oldColor = Console.ForegroundColor
     Console.ForegroundColor <- color
-    printf str
+    printf "%s" str
     Console.ForegroundColor <- oldColor

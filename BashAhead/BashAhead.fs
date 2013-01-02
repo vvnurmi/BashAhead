@@ -41,12 +41,11 @@ let showCreature c =
         | x when x > 0<hp> -> printfc "Critical\t" Color.Red
         | _ -> printfc "Dead\t" Color.DarkGray
     let showProperties weapon =
-        printf "[%s]\t" weapon
-    printf "%s\t" c.name
+        printfc (sprintf "[%s]\t" weapon) Color.Gray
+    printfc (c.name + "\t") Color.Gray
     showHitpoints c.hitpoints c.maxhitpoints
     showProperties c.weaponName
-    printfn ""
-
+    printfc "\n" Color.Gray
 let showState =
     stateM {
         do! lift showCreature getHero
@@ -55,7 +54,7 @@ let showState =
     }
 let getUserActions () =
     stateM {
-        printfn "Thrust, Swing, Quit?"
+        printfc "Thrust, Swing, Quit? " Color.White
         let command = getCommand ()
         return!
             match command with
@@ -69,7 +68,7 @@ let rec frameStep actions =
         do! updateState actions
         let! gameOver = getGameOver
         if gameOver <> null then
-            printfn "Game over. %s" gameOver
+            printfc (sprintf "Game over. %s" gameOver) Color.White
             promptUser ()
             return ()
         else
