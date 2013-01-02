@@ -51,7 +51,7 @@ let showState =
     }
 let getUserActions () =
     stateM {
-        printfc "Thrust, Swing, Quit? " Color.White
+        print [ StrColor("Thrust, Swing, Quit? ", Color.White) ]
         let command = getCommand ()
         return!
             match command with
@@ -65,7 +65,7 @@ let rec frameStep actions =
         do! updateState actions
         let! gameOver = getGameOver
         if gameOver <> null then
-            printfc (sprintf "Game over. %s" gameOver) Color.White
+            print [ StrColor(sprintf "Game over. %s" gameOver, Color.White) ]
             promptUser ()
             return ()
         else

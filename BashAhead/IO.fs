@@ -11,15 +11,12 @@ let getCommand () =
     Console.ReadLine().PadRight(1).Substring(0, 1).ToLowerInvariant()
 let promptUser () =
     getCommand () |> ignore
-let printfc str color =
+let printCore str color =
     let oldColor = Console.ForegroundColor
     Console.ForegroundColor <- color
-    printf "%s" str
+    printf "%s\t" str
     Console.ForegroundColor <- oldColor
-let rec print =
-    let printCore s c =
-        printfc (s + "\t") c
-    function
+let rec print = function
     | StrColor(s, c) :: tail ->
         printCore s c
         print tail
