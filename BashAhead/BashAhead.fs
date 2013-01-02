@@ -1,6 +1,6 @@
 ﻿module BA
 
-open System
+open IO
 open Types
 open State
 open Update
@@ -33,21 +33,16 @@ let createHero =
     }
 
 let showCreature c =
-    printf "%s\t" c.name
-    let printfc str color =
-        let oldColor = Console.ForegroundColor
-        Console.ForegroundColor <- color
-        printf str
-        Console.ForegroundColor <- oldColor
     let showHitpoints hp hpMax =
         match hp with
-        | x when x > hpMax -> printfc "Brilliant\t" ConsoleColor.White
-        | x when x = hpMax -> printfc "Ok\t" ConsoleColor.Green
-        | x when x > hpMax / 2 -> printfc "Wounded\t" ConsoleColor.Yellow
-        | x when x > 0<hp> -> printfc "Critical\t" ConsoleColor.Red
-        | _ -> printfc "Dead\t" ConsoleColor.DarkGray
+        | x when x > hpMax -> printfc "Brilliant\t" Color.White
+        | x when x = hpMax -> printfc "Ok\t" Color.Green
+        | x when x > hpMax / 2 -> printfc "Wounded\t" Color.Yellow
+        | x when x > 0<hp> -> printfc "Critical\t" Color.Red
+        | _ -> printfc "Dead\t" Color.DarkGray
     let showProperties weapon =
         printf "[%s]\t" weapon
+    printf "%s\t" c.name
     showHitpoints c.hitpoints c.maxhitpoints
     showProperties c.weaponName
     printfn ""
@@ -61,7 +56,7 @@ let showState =
 let getUserActions () =
     stateM {
         printfn "Thrust, Swing, Quit?"
-        let command = Console.ReadLine().PadRight(1).Substring(0, 1).ToLowerInvariant()
+        let command = getCommand ()
         return!
             match command with
             | "t" -> attackWeakest
@@ -75,7 +70,7 @@ let rec frameStep actions =
         let! gameOver = getGameOver
         if gameOver <> null then
             printfn "Game over. %s" gameOver
-            Console.ReadLine () |> ignore
+            promptUser ()
             return ()
         else
             return! uiLoop ()

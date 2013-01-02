@@ -48,6 +48,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IO.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Library.fs" />
     <Compile Include="State.fs" />
