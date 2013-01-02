@@ -42,7 +42,7 @@ let showCreature c =
         | x when x > 0<hp> -> StrColor("Critical", Color.Red)
         | _ -> StrColor("Dead", Color.DarkGray)
     let propertyElem = Str(sprintf "[%s]" c.weaponName)
-    print [nameElem; hpElem; propertyElem]
+    print (Row([ nameElem; hpElem; propertyElem ]))
 let showState =
     stateM {
         do! lift showCreature getHero
@@ -51,7 +51,7 @@ let showState =
     }
 let getUserActions () =
     stateM {
-        print [ StrColor("Thrust, Swing, Quit? ", Color.White) ]
+        print (StrColor("Thrust, Swing, Quit? ", Color.White))
         let command = getCommand ()
         return!
             match command with
@@ -65,7 +65,7 @@ let rec frameStep actions =
         do! updateState actions
         let! gameOver = getGameOver
         if gameOver <> null then
-            print [ StrColor(sprintf "Game over. %s" gameOver, Color.White) ]
+            print (StrColor(sprintf "Game over. %s" gameOver, Color.White))
             promptUser ()
             return ()
         else

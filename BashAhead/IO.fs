@@ -4,6 +4,7 @@ open System
 
 type Color = ConsoleColor
 type FormatElement =
+    | Row of FormatElement list
     | StrColor of string * Color
     | Str of string
 
@@ -14,14 +15,13 @@ let promptUser () =
 let printCore str color =
     let oldColor = Console.ForegroundColor
     Console.ForegroundColor <- color
-    printf "%s\t" str
+    printf "%s" str
     Console.ForegroundColor <- oldColor
 let rec print = function
-    | StrColor(s, c) :: tail ->
-        printCore s c
-        print tail
-    | Str(s) :: tail ->
-        printCore s Color.Gray
-        print tail
-    | [] ->
+    | Row(cells) ->
+        List.iter (fun cell -> print cell; printf "\t") cells
         printfn ""
+    | StrColor(s, c) ->
+        printCore s c
+    | Str(s) ->
+        printCore s Color.Gray
