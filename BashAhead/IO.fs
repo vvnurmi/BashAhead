@@ -13,6 +13,9 @@ type FormatContext = { x : int; y : int; color : Color }
 type FormattedString = { context : FormatContext; str : string }
 
 // Helpers
+let rec isConstant = function
+    | a :: (b :: c as tail) -> a = b && isConstant tail
+    | _ :: [] | [] -> true
 let rec transpose = function
     | (_ :: _) :: _ as x -> (List.map List.head x) :: (transpose (List.map List.tail x))
     | _ -> []
@@ -27,6 +30,7 @@ let rec getSize = function
     | StrColor(s, _) | Str(s) -> (s.Length, 1)
 and getTableCellSizes rows =
     let rowSizes = List.map (fun (Row(cells)) -> List.map getSize cells) rows
+    if not << isConstant <| List.map List.length rowSizes then failwith "Table rows have different numbers of cells"
     let maxCellWidths = rowSizes |> transpose |> List.map (List.map fst >> List.max)
     let maxCellHeights = rowSizes |> List.map (List.map snd >> List.max)
     (List.map ((+) 2) maxCellWidths, maxCellHeights)
