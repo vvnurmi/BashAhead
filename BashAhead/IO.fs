@@ -17,7 +17,7 @@ let rec isConstant = function
     | a :: (b :: c as tail) -> a = b && isConstant tail
     | _ :: [] | [] -> true
 let rec transpose = function
-    | (_ :: _) :: _ as x -> (List.map List.head x) :: (transpose (List.map List.tail x))
+    | (_ :: _) :: _ as x -> List.map List.head x :: transpose (List.map List.tail x)
     | _ -> []
 let setContext c =
     Console.CursorLeft <- c.x
@@ -37,7 +37,7 @@ and getTableCellSizes rows =
 let rec format context = function
     | Table(rows) as t ->
         let (cellWidths, cellHeights) = getTableCellSizes rows
-        formatTable context cellWidths (List.zip rows cellHeights)
+        formatTable context cellWidths <| List.zip rows cellHeights
     | StrColor(s, c) -> [ { context = { context with color = c }; str = s } ]
     | Str(s) -> [ { context = context; str = s } ]
 and formatTable context cellWidths = function
@@ -45,9 +45,9 @@ and formatTable context cellWidths = function
         let rec formatCells context = function
             | (cell, size) :: tail ->
                 let newContext = { context with x = context.x + size }
-                (format context cell) @ formatCells newContext tail
+                format context cell @ formatCells newContext tail
             | [] -> []
-        let fmts = formatCells context (List.zip cells cellWidths)
+        let fmts = formatCells context <| List.zip cells cellWidths
         let newContext = { context with y = context.y + cellHeight }
         fmts @ formatTable newContext cellWidths tail
     | [] -> []

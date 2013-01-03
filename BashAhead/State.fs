@@ -79,15 +79,15 @@ let mapState f =
 
 let identify id =
     stateM {
-        let! isHero = getState (fun state -> Some(id) = state.hero)
+        let! isHero = getState <| fun state -> Some(id) = state.hero
         return if isHero then Hero else Monster
     }
 let isDead c =
     c.hitpoints <= 0<hp>
 let getCreature id =
-    getState (fun state -> Map.find id state.creatures)
+    getState <| fun state -> Map.find id state.creatures
 let setCreature id c =
-    mapState (fun state -> { state with creatures = Map.add id c state.creatures })
+    mapState <| fun state -> { state with creatures = Map.add id c state.creatures }
 let updateCreature f id =
     stateM {
         let! c = getCreature id
@@ -97,31 +97,31 @@ let getHero =
     StateOp(fun state ->
     match state.hero with
     | Some c -> run (getCreature c) state
-    | _ -> failwith "Hero not defined" )
+    | _ -> failwith "Hero not defined")
 let setHero h =
-    mapState (fun state ->
+    mapState <| fun state ->
         { state with
             hero = Some(h.id);
-            creatures = Map.add h.id h state.creatures })
+            creatures = Map.add h.id h state.creatures }
 let getMonsters =
     StateOp(fun state ->
-    run (adapt (fun op -> List.map op state.monsters) getCreature) state)
+    run <| adapt (fun op -> List.map op state.monsters) getCreature <| state)
 let addMonster m =
-    mapState (fun state ->
+    mapState <| fun state ->
         { state with
             monsters = m.id :: state.monsters;
-            creatures = Map.add m.id m state.creatures })
+            creatures = Map.add m.id m state.creatures }
 let removeMonster id =
-    mapState (fun state ->
+    mapState <| fun state ->
         { state with
-            monsters = List.filter (fun mId -> mId <> id) state.monsters })
+            monsters = List.filter (fun mId -> mId <> id) state.monsters }
 let getGameOver =
-    getState (fun state -> state.gameOver)
+    getState <| fun state -> state.gameOver
 let setGameOver =
-    mapState (fun state -> { state with gameOver = true })
+    mapState <| fun state -> { state with gameOver = true }
 let getMessages =
-    getState (fun state -> state.messages)
+    getState <| fun state -> state.messages
 let addMessage m =
-    mapState (fun state -> { state with messages = m :: state.messages })
+    mapState <| fun state -> { state with messages = m :: state.messages }
 let clearMessages =
-    mapState (fun state -> { state with messages = [] })
+    mapState <| fun state -> { state with messages = [] }

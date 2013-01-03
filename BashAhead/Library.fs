@@ -8,4 +8,4 @@ let weapons =
         { name = "sword"; power = 3<hp> };
         { name = "fangs"; power = 1<hp> };
     ]
-    Map.ofList (List.map (fun (w : Weapon) -> w.name, w) weaponsList)
+    weaponsList |> List.map (fun w -> w.name, w) |> Map.ofList

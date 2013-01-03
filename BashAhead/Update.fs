@@ -40,7 +40,7 @@ let applyChange change =
                 do! setGameOver
             | Monster ->
                 let! c = getCreature victimId
-                do! addMessage (sprintf "Life escapes %s!" c.name)
+                do! addMessage <| sprintf "Life escapes %s!" c.name
                 do! removeMonster victimId
             return []
     }
@@ -61,7 +61,7 @@ let attackWeakest =
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         return
-            match (List.sortBy (fun m -> m.hitpoints) monsters) with
+            match List.sortBy (fun m -> m.hitpoints) monsters with
             | weakest :: _ -> [ Attack(hero.id, weakest.id, weapon.power) ]
             | _ -> []
     }

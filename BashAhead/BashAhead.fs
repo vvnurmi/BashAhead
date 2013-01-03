@@ -17,7 +17,7 @@ let createMonster =
             name = chooseOne [| "orc"; "goblin"; "wolf" |]
             maxhitpoints = 12<hp>
             hitpoints = 12<hp>
-            weaponName = chooseOne (Array.map (fun (name, w) -> name) (Map.toArray Library.weapons))
+            weaponName = chooseOne <| Array.map fst (Map.toArray Library.weapons)
             weaponKnown = false
         }
     }
@@ -59,7 +59,7 @@ let showState =
     }
 let getUserActions () =
     stateM {
-        printPrompt (StrColor("Thrust, Swing, Quit? ", Color.White))
+        printPrompt <| StrColor("Thrust, Swing, Quit? ", Color.White)
         let command = getCommand ()
         return!
             match command with
@@ -73,7 +73,7 @@ let rec frameStep actions =
         do! updateState actions
         let! gameOver = getGameOver
         if gameOver then
-            printPrompt (StrColor("Game over.", Color.White))
+            printPrompt <| StrColor("Game over.", Color.White)
             promptUser ()
             return ()
         else
@@ -84,9 +84,9 @@ and uiLoop () =
         clear ()
         do! showState
         let! userActions = getUserActions ()
-        if not (List.exists (fun a -> a = Quit) userActions) then
+        if not <| List.exists (fun a -> a = Quit) userActions then
             let! gameActions = getGameActions
-            do! frameStep (userActions @ gameActions)
+            do! frameStep <| userActions @ gameActions
     }
 let main =
     stateM {
