@@ -46,11 +46,16 @@ let formatCreature c =
     let weaponStr = if c.weaponKnown then c.weaponName else "???"
     let propertyElem = Str(sprintf "[%s]" weaponStr)
     Row([ nameElem; hpElem; propertyElem ])
+let formatMessages messages =
+    List.map (fun m -> Row([ Str(m) ])) messages
 let showState =
     stateM {
         let! heroRow = lift formatCreature getHero
         let! monsterRows = lift (List.map formatCreature) getMonsters
-        printStatus (Table(heroRow :: monsterRows))
+        let! messageRows = lift formatMessages getMessages
+        printStatus <| Table(heroRow :: monsterRows)
+        printMessages <| Table(messageRows)
+        do! clearMessages
     }
 let getUserActions () =
     stateM {
@@ -67,8 +72,8 @@ let rec frameStep actions =
     stateM {
         do! updateState actions
         let! gameOver = getGameOver
-        if gameOver <> null then
-            printPrompt (StrColor(sprintf "Game over. %s" gameOver, Color.White))
+        if gameOver then
+            printPrompt (StrColor("Game over.", Color.White))
             promptUser ()
             return ()
         else

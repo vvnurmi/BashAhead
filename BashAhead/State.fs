@@ -7,7 +7,8 @@ type StateT = {
     creatures : Map<CreatureId, Creature>
     hero : CreatureId option
     monsters : CreatureId list
-    gameOver : string
+    gameOver : bool
+    messages : string list
 }
 type StateOp<'a> = StateOp of (StateT -> 'a * StateT)
 
@@ -16,7 +17,8 @@ let stateUnit = {
     creatures = Map.empty
     hero = None
     monsters = []
-    gameOver = null
+    gameOver = false
+    messages = []
 }
 
 let getNewId =
@@ -115,7 +117,11 @@ let removeMonster id =
             monsters = List.filter (fun mId -> mId <> id) state.monsters })
 let getGameOver =
     getState (fun state -> state.gameOver)
-let setGameOver s =
-    mapState (fun state ->
-        { state with
-            gameOver = s })
+let setGameOver =
+    mapState (fun state -> { state with gameOver = true })
+let getMessages =
+    getState (fun state -> state.messages)
+let addMessage m =
+    mapState (fun state -> { state with messages = m :: state.messages })
+let clearMessages =
+    mapState (fun state -> { state with messages = [] })

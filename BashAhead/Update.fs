@@ -35,14 +35,19 @@ let applyChange change =
         | Die(victimId) ->
             let! cType = identify victimId
             match cType with
-            | Hero -> do! setGameOver "You died!"
-            | Monster -> do! removeMonster victimId
+            | Hero ->
+                do! addMessage "You draw your terminal breath!"
+                do! setGameOver
+            | Monster ->
+                let! c = getCreature victimId
+                do! addMessage (sprintf "Life escapes %s!" c.name)
+                do! removeMonster victimId
             return []
     }
 let rec applyChanges changes =
     stateM {
         let! changes = adapt (fun op -> List.collect op changes) applyChange
-        if not changes.IsEmpty then return! applyChanges changes
+        if not changes.IsEmpty then do! applyChanges changes
     }
 let updateState actions =
     stateM {

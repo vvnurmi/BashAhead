@@ -66,4 +66,5 @@ let rec print context elem =
     setContext context
 let printPrompt = print { x = 0; y = 20; color = Color.White }
 let printStatus = print { x = 0; y = 0; color = Color.Gray }
+let printMessages = print { x = 0; y = 10; color = Color.Gray }
 let clear = Console.Clear
