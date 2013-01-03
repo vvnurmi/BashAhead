@@ -3,20 +3,20 @@
 open Types
 
 type StateT = {
-    nextId : int;
-    creatures : Map<CreatureId, Creature>;
-    hero : CreatureId option;
-    monsters : CreatureId list;
-    gameOver : string;
+    nextId : int
+    creatures : Map<CreatureId, Creature>
+    hero : CreatureId option
+    monsters : CreatureId list
+    gameOver : string
 }
 type StateOp<'a> = StateOp of (StateT -> 'a * StateT)
 
 let stateUnit = {
-    nextId = 0;
-    creatures = Map.empty;
-    hero = None;
-    monsters = [];
-    gameOver = null;
+    nextId = 0
+    creatures = Map.empty
+    hero = None
+    monsters = []
+    gameOver = null
 }
 
 let getNewId =

@@ -13,22 +13,22 @@ let createMonster =
     stateM {
         let! id = getNewId
         return {
-            id = id;
-            name = chooseOne [| "orc"; "goblin"; "wolf" |];
-            maxhitpoints = 12<hp>;
-            hitpoints = 12<hp>;
-            weaponName = chooseOne (Array.map (fun (name, w) -> name) (Map.toArray Library.weapons));
+            id = id
+            name = chooseOne [| "orc"; "goblin"; "wolf" |]
+            maxhitpoints = 12<hp>
+            hitpoints = 12<hp>
+            weaponName = chooseOne (Array.map (fun (name, w) -> name) (Map.toArray Library.weapons))
         }
     }
 let createHero =
     stateM {
         let! id = getNewId
         return {
-            id = id;
-            name = "Hero";
-            maxhitpoints = 42<hp>;
-            hitpoints = 42<hp>;
-            weaponName = "sword";
+            id = id
+            name = "Hero"
+            maxhitpoints = 42<hp>
+            hitpoints = 42<hp>
+            weaponName = "sword"
         }
     }
 
