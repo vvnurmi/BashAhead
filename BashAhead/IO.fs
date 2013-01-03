@@ -13,30 +13,39 @@ type FormatContext = { x : int; y : int; color : Color }
 type FormattedString = { context : FormatContext; str : string }
 
 // Helpers
+let rec transpose = function
+    | (_ :: _) :: _ as x -> (List.map List.head x) :: (transpose (List.map List.tail x))
+    | _ -> []
 let setContext c =
     Console.CursorLeft <- c.x
     Console.CursorTop <- c.y
     Console.ForegroundColor <- c.color
-let getCellSizes = function
-    | Row(cells) :: _ -> List.map (fun cell -> 10) cells // TODO
-    | [] -> []
-let rec format context = function
+let rec getSize = function
     | Table(rows) ->
-        formatTable context (getCellSizes rows) rows
-    | StrColor(s, c) ->
-        [ { context = { context with color = c }; str = s } ]
-    | Str(s) ->
-        [ { context = context; str = s } ]
-and formatTable context cellSizes = function
-    | Row(cells) :: tail ->
+        let (cellWidths, cellHeights) = getTableCellSizes rows
+        (List.sum cellWidths, List.sum cellHeights)
+    | StrColor(s, _) | Str(s) -> (s.Length, 1)
+and getTableCellSizes rows =
+    let rowSizes = List.map (fun (Row(cells)) -> List.map getSize cells) rows
+    let maxCellWidths = rowSizes |> transpose |> List.map (List.map fst >> List.max)
+    let maxCellHeights = rowSizes |> List.map (List.map snd >> List.max)
+    (maxCellWidths, maxCellHeights)
+let rec format context = function
+    | Table(rows) as t ->
+        let (cellWidths, cellHeights) = getTableCellSizes rows
+        formatTable context cellWidths (List.zip rows cellHeights)
+    | StrColor(s, c) -> [ { context = { context with color = c }; str = s } ]
+    | Str(s) -> [ { context = context; str = s } ]
+and formatTable context cellWidths = function
+    | (Row(cells), cellHeight) :: tail ->
         let rec formatCells context = function
             | (cell, size) :: tail ->
                 let newContext = { context with x = context.x + size }
                 (format context cell) @ formatCells newContext tail
             | [] -> []
-        let fmts = formatCells context (List.zip cells cellSizes)
-        let newContext = { context with y = context.y + 1 }
-        fmts @ formatTable newContext cellSizes tail
+        let fmts = formatCells context (List.zip cells cellWidths)
+        let newContext = { context with y = context.y + cellHeight }
+        fmts @ formatTable newContext cellWidths tail
     | [] -> []
 
 // Public interface
