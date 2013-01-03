@@ -86,6 +86,11 @@ let getCreature id =
     getState (fun state -> Map.find id state.creatures)
 let setCreature id c =
     mapState (fun state -> { state with creatures = Map.add id c state.creatures })
+let updateCreature f id =
+    stateM {
+        let! c = getCreature id
+        do! setCreature id (f c)
+    }
 let getHero =
     StateOp(fun state ->
     match state.hero with

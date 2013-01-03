@@ -30,8 +30,7 @@ let applyChange change =
             do! setCreature victimId { victim with hitpoints = newHitpoints }
             return if newHitpoints <= 0<hp> then [ Die(victimId) ] else []
         | WeaponKnown(actorId) ->
-            let! actor = getCreature actorId
-            do! setCreature actorId { actor with weaponKnown = true }
+            do! updateCreature (fun actor -> { actor with weaponKnown = true }) actorId
             return []
         | Die(victimId) ->
             let! cType = identify victimId
