@@ -13,12 +13,14 @@ type Creature = {
     maxhitpoints : int<hp>
     hitpoints : int<hp>
     weaponName : string
+    weaponKnown : bool
 }
 type Action =
-    | Attack of CreatureId * int<hp>
+    | Attack of CreatureId * CreatureId * int<hp> // actor * victim * power
     | Quit
 type Change =
     | GetHit of CreatureId * int<hp>
+    | WeaponKnown of CreatureId
     | Die of CreatureId
 type CreatureType =
     | Hero

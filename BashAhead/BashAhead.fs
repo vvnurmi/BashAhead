@@ -18,6 +18,7 @@ let createMonster =
             maxhitpoints = 12<hp>
             hitpoints = 12<hp>
             weaponName = chooseOne (Array.map (fun (name, w) -> name) (Map.toArray Library.weapons))
+            weaponKnown = false
         }
     }
 let createHero =
@@ -29,6 +30,7 @@ let createHero =
             maxhitpoints = 42<hp>
             hitpoints = 42<hp>
             weaponName = "sword"
+            weaponKnown = true
         }
     }
 
@@ -41,7 +43,8 @@ let formatCreature c =
         | x when x > c.maxhitpoints / 2 -> StrColor("Wounded", Color.Yellow)
         | x when x > 0<hp> -> StrColor("Critical", Color.Red)
         | _ -> StrColor("Dead", Color.DarkGray)
-    let propertyElem = Str(sprintf "[%s]" c.weaponName)
+    let weaponStr = if c.weaponKnown then c.weaponName else "???"
+    let propertyElem = Str(sprintf "[%s]" weaponStr)
     Row([ nameElem; hpElem; propertyElem ])
 let showState =
     stateM {

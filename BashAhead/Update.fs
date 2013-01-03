@@ -7,7 +7,7 @@ let getMonsterActions m =
     stateM {
         let! hero = getHero
         let weapon = Map.find m.weaponName Library.weapons
-        return [ Attack(hero.id, weapon.power) ]
+        return [ Attack(m.id, hero.id, weapon.power) ]
     }
 let getGameActions =
     stateM {
@@ -18,7 +18,7 @@ let applyAction action =
     stateM {
         return
             match action with
-            | Attack(target, power) -> [ GetHit(target, power) ]
+            | Attack(actor, target, power) -> [ WeaponKnown(actor); GetHit(target, power) ]
             | Quit -> failwith "Quit"
     }
 let applyChange change =
@@ -29,6 +29,10 @@ let applyChange change =
             let newHitpoints = victim.hitpoints - power
             do! setCreature victimId { victim with hitpoints = newHitpoints }
             return if newHitpoints <= 0<hp> then [ Die(victimId) ] else []
+        | WeaponKnown(actorId) ->
+            let! actor = getCreature actorId
+            do! setCreature actorId { actor with weaponKnown = true }
+            return []
         | Die(victimId) ->
             let! cType = identify victimId
             match cType with
@@ -54,7 +58,7 @@ let attackWeakest =
         let! monsters = getMonsters
         return
             match (List.sortBy (fun m -> m.hitpoints) monsters) with
-            | weakest :: _ -> [ Attack(weakest.id, weapon.power) ]
+            | weakest :: _ -> [ Attack(hero.id, weakest.id, weapon.power) ]
             | _ -> []
     }
 let attackAll =
@@ -62,5 +66,5 @@ let attackAll =
         let! hero = getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
-        return List.map (fun m -> Attack(m.id, weapon.power * 2 / 3)) monsters
+        return List.map (fun m -> Attack(hero.id, m.id, weapon.power * 2 / 3)) monsters
     }
