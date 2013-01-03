@@ -29,7 +29,7 @@ and getTableCellSizes rows =
     let rowSizes = List.map (fun (Row(cells)) -> List.map getSize cells) rows
     let maxCellWidths = rowSizes |> transpose |> List.map (List.map fst >> List.max)
     let maxCellHeights = rowSizes |> List.map (List.map snd >> List.max)
-    (maxCellWidths, maxCellHeights)
+    (List.map ((+) 2) maxCellWidths, maxCellHeights)
 let rec format context = function
     | Table(rows) as t ->
         let (cellWidths, cellHeights) = getTableCellSizes rows
