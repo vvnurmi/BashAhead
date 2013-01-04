@@ -47,7 +47,7 @@ let formatCreature c =
     let propertyElem = Str(sprintf "[%s]" weaponStr)
     Row [ nameElem; hpElem; propertyElem ]
 let formatMessages messages =
-    List.map (fun m -> Row [ Str m ]) messages
+    List.map (fun m -> Row [ Str m ]) <| List.rev messages
 let showState =
     stateM {
         let! heroRow = lift formatCreature getHero
