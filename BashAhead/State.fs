@@ -1,5 +1,6 @@
 ﻿module State
 
+open Misc
 open Types
 
 type StateT = {
@@ -120,6 +121,6 @@ let setGameOver =
 let getMessages =
     getState <| fun state -> state.messages
 let addMessage m =
-    mapState <| fun state -> { state with messages = m :: state.messages }
+    mapState <| fun state -> { state with messages = capitalize m :: state.messages }
 let clearMessages =
     mapState <| fun state -> { state with messages = [] }
