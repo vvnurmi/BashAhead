@@ -18,7 +18,7 @@ let applyAction action =
     stateM {
         return
             match action with
-            | Attack(actor, target, power) -> [ WeaponKnown(actor); GetHit(target, power) ]
+            | Attack(actor, target, power) -> [ WeaponKnown actor; GetHit(target, power) ]
             | Quit -> failwith "Quit"
     }
 let applyChange change =
@@ -28,8 +28,8 @@ let applyChange change =
             let! victim = getCreature victimId
             let newHitpoints = victim.hitpoints - power
             do! setCreature victimId { victim with hitpoints = newHitpoints }
-            return if newHitpoints <= 0<hp> then [ Die(victimId) ] else []
-        | WeaponKnown(actorId) ->
+            return if newHitpoints <= 0<hp> then [ Die victimId ] else []
+        | WeaponKnown actorId ->
             do! updateCreature (fun actor -> { actor with weaponKnown = true }) actorId
             return []
         | Die(victimId) ->

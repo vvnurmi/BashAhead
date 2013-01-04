@@ -7,7 +7,7 @@ open Update
 
 let state = stateUnit
 let random = System.Random()
-let chooseOne (list : string []) = list.[random.Next(list.Length)]
+let chooseOne (list : string []) = list.[random.Next list.Length]
 
 let createMonster =
     stateM {
@@ -45,16 +45,16 @@ let formatCreature c =
         | _ -> StrColor("Dead", Color.DarkGray)
     let weaponStr = if c.weaponKnown then c.weaponName else "???"
     let propertyElem = Str(sprintf "[%s]" weaponStr)
-    Row([ nameElem; hpElem; propertyElem ])
+    Row [ nameElem; hpElem; propertyElem ]
 let formatMessages messages =
-    List.map (fun m -> Row([ Str(m) ])) messages
+    List.map (fun m -> Row [ Str m ]) messages
 let showState =
     stateM {
         let! heroRow = lift formatCreature getHero
         let! monsterRows = lift (List.map formatCreature) getMonsters
         let! messageRows = lift formatMessages getMessages
         printStatus <| Table(heroRow :: monsterRows)
-        printMessages <| Table(messageRows)
+        printMessages <| Table messageRows
         do! clearMessages
     }
 let getUserActions () =

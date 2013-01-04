@@ -22,47 +22,45 @@ let stateUnit = {
 }
 
 let getNewId =
-    StateOp(fun state ->
-    (state.nextId, { state with nextId = state.nextId + 1 } ))
+    StateOp <| fun state ->
+    state.nextId, { state with nextId = state.nextId + 1 }
 
 let run m state =
     match m with
     | StateOp f -> f state
 let ret a =
-    StateOp(fun state ->
-    (a, state))
+    StateOp <| fun state ->
+    a, state
 let lift f gOp =
-    StateOp(fun state ->
-    let (gResult, state2) = run gOp state
-    (f gResult, state2))
+    StateOp <| fun state ->
+    let gResult, state2 = run gOp state
+    f gResult, state2
 let adapt f op =
-    StateOp(fun state ->
+    StateOp <| fun state ->
     let mutableState = ref state
     let op2 x =
-        let (rOp, newState) = run (op x) !mutableState
+        let rOp, newState = run (op x) !mutableState
         mutableState := newState
         rOp
-    (f op2, !mutableState))
+    f op2, !mutableState
 
 type StateBuilder() =
     member x.Bind(mf, g) =
-        StateOp(fun state ->
-        let (rf, state2) = run mf state
-        let (rg, state3) = run (g rf) state2
-        (rg, state3))
+        StateOp <| fun state ->
+        let rf, state2 = run mf state
+        run (g rf) state2
     member x.Combine(mf, mg) =
-        StateOp(fun state ->
-        let (rf, state2) = run mf state
-        let (rg, state3) = run mg state2
-        (rg, state3))
+        StateOp <| fun state ->
+        let rf, state2 = run mf state
+        run mg state2
     member x.Return(a) =
         ret a
     member x.ReturnFrom(mf) =
-        StateOp(fun state ->
-        run mf state)
+        StateOp <| fun state ->
+        run mf state
     member x.Zero() =
-        StateOp(fun state ->
-        ((), state))
+        StateOp <| fun state ->
+        (), state
     member x.For(s, f) =
         adapt (fun op -> Seq.iter op s) f
     member x.Delay(f) = f ()
@@ -71,15 +69,15 @@ let stateM = StateBuilder()
 
 
 let getState f =
-    StateOp(fun state ->
-    (f state, state))
+    StateOp <| fun state ->
+    f state, state
 let mapState f =
-    StateOp(fun state ->
-    ((), f state))
+    StateOp <| fun state ->
+    (), f state
 
 let identify id =
     stateM {
-        let! isHero = getState <| fun state -> Some(id) = state.hero
+        let! isHero = getState <| fun state -> Some id = state.hero
         return if isHero then Hero else Monster
     }
 let isDead c =
@@ -94,18 +92,18 @@ let updateCreature f id =
         do! setCreature id (f c)
     }
 let getHero =
-    StateOp(fun state ->
+    StateOp <| fun state ->
     match state.hero with
     | Some c -> run (getCreature c) state
-    | _ -> failwith "Hero not defined")
+    | _ -> failwith "Hero not defined"
 let setHero h =
     mapState <| fun state ->
         { state with
             hero = Some(h.id);
             creatures = Map.add h.id h state.creatures }
 let getMonsters =
-    StateOp(fun state ->
-    run <| adapt (fun op -> List.map op state.monsters) getCreature <| state)
+    StateOp <| fun state ->
+    run <| adapt (fun op -> List.map op state.monsters) getCreature <| state
 let addMonster m =
     mapState <| fun state ->
         { state with

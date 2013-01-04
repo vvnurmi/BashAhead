@@ -26,22 +26,22 @@ let setContext c =
 let rec getSize = function
     | Table(rows) ->
         let (cellWidths, cellHeights) = getTableCellSizes rows
-        (List.sum cellWidths, List.sum cellHeights)
-    | StrColor(s, _) | Str(s) -> (s.Length, 1)
+        List.sum cellWidths, List.sum cellHeights
+    | StrColor(s, _) | Str s -> s.Length, 1
 and getTableCellSizes rows =
-    let rowSizes = List.map (fun (Row(cells)) -> List.map getSize cells) rows
+    let rowSizes = List.map (fun (Row cells) -> List.map getSize cells) rows
     if not << isConstant <| List.map List.length rowSizes then failwith "Table rows have different numbers of cells"
     let maxCellWidths = rowSizes |> transpose |> List.map (List.map fst >> List.max)
     let maxCellHeights = rowSizes |> List.map (List.map snd >> List.max)
-    (List.map ((+) 2) maxCellWidths, maxCellHeights)
+    List.map ((+) 2) maxCellWidths, maxCellHeights
 let rec format context = function
     | Table(rows) as t ->
-        let (cellWidths, cellHeights) = getTableCellSizes rows
+        let cellWidths, cellHeights = getTableCellSizes rows
         formatTable context cellWidths <| List.zip rows cellHeights
     | StrColor(s, c) -> [ { context = { context with color = c }; str = s } ]
-    | Str(s) -> [ { context = context; str = s } ]
+    | Str s -> [ { context = context; str = s } ]
 and formatTable context cellWidths = function
-    | (Row(cells), cellHeight) :: tail ->
+    | (Row cells, cellHeight) :: tail ->
         let rec formatCells context = function
             | (cell, size) :: tail ->
                 let newContext = { context with x = context.x + size }
