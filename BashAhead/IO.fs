@@ -1,6 +1,7 @@
 ﻿module IO
 
 open System
+open Misc
 
 type Color = ConsoleColor
 type FormatElement =
@@ -13,12 +14,6 @@ type FormatContext = { x : int; y : int; color : Color }
 type FormattedString = { context : FormatContext; str : string }
 
 // Helpers
-let rec isConstant = function
-    | a :: (b :: c as tail) -> a = b && isConstant tail
-    | _ :: [] | [] -> true
-let rec transpose = function
-    | (_ :: _) :: _ as x -> List.map List.head x :: transpose (List.map List.tail x)
-    | _ -> []
 let setContext c =
     Console.CursorLeft <- c.x
     Console.CursorTop <- c.y
