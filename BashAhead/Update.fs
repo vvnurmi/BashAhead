@@ -44,10 +44,19 @@ let applyChange change =
                 do! removeMonster victimId
             return []
     }
+let preprocessChanges =
+    let deaths = ref Set.empty
+    let changeFilter = function
+        | Die(_) as c ->
+            let skip = (!deaths).Contains c
+            deaths := (!deaths).Add c
+            not skip
+        | _ -> true
+    List.filter changeFilter
 let rec applyChanges changes =
     stateM {
         let! changes = adapt (fun op -> List.collect op changes) applyChange
-        if not changes.IsEmpty then do! applyChanges changes
+        if not changes.IsEmpty then do! changes |> preprocessChanges |> applyChanges 
     }
 let updateState actions =
     stateM {
