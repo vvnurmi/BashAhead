@@ -3,15 +3,21 @@
 open Types
 open State
 
+let fleeDistanceMin = 8
+
 let getMonsterActions m =
     stateM {
         let! hero = getHero
         let weapon = Map.find m.weaponName Library.weapons
-        return
+        let doInRange x min max =
             match m.distance with
-            | d when d < weapon.rangeMin -> [ GainDistance(m.id, 1) ]
-            | d when d > weapon.rangeMax -> [ GainDistance(m.id, -1) ]
-            | _ -> [ Attack(m.id, hero.id, weapon.power) ]
+            | d when d < min -> [ GainDistance(m.id, 1) ]
+            | d when d > max -> [ GainDistance(m.id, -1) ]
+            | _ -> x
+        if m.hitpoints < m.maxhitpoints && m.hitpoints <= 8<hp> then
+            return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue
+        else
+            return doInRange [ Attack(m.id, hero.id, weapon.power) ] weapon.rangeMin weapon.rangeMax
     }
 let getGameActions =
     stateM {
@@ -40,6 +46,25 @@ let applyAction action =
                 return List.map (fun m -> Move(m.id, delta)) monsters
             | Monster ->
                 return [ Move(actorId, delta) ]
+        | Flee actorId ->
+            let! cType = identify actorId
+            let tryFlee distance failStr =
+                stateM {
+                    if distance >= fleeDistanceMin then
+                        return [ Escape actorId ]
+                    else
+                        do! addMessage failStr
+                        return []
+                }
+            match cType with
+            | Hero ->
+                let! monsters = getMonsters
+                let distance = monsters |> List.map (fun m -> m.distance) |> List.max
+                return! tryFlee distance "You try to flee but monsters are too near."
+            | Monster ->
+                let! m = getCreature actorId
+                let failStr = sprintf "%s fails to escape your attention." m.name
+                return! tryFlee m.distance failStr
         | Quit ->
             failwith "Quit"
             return []
@@ -65,7 +90,19 @@ let applyChange change =
             do! updateCreature (fun actor ->
                 { actor with distance = max 0 actor.distance + d }) actorId
             return []
-        | Die(victimId) ->
+        | Escape actorId ->
+            let! cType = identify actorId
+            match cType with
+            | Hero ->
+                do! addMessage "You escape the battle!"
+                do! setGameOver
+                return []
+            | Monster ->
+                let! c = getCreature actorId
+                do! addMessage <| sprintf "%s flees!" c.name
+                do! removeMonster actorId
+                return []
+        | Die victimId ->
             let! cType = identify victimId
             match cType with
             | Hero ->
