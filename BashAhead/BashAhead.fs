@@ -61,9 +61,12 @@ let showState =
     }
 let getUserActions () =
     stateM {
-        let command = getCommand "Thrust, Swing, Quit?"
+        let command = getCommand "Advance, Back up, Thrust, Swing, Quit?"
+        let! hero = getHero
         return!
             match command with
+            | "a" -> ret [ GainDistance(hero.id, -1) ]
+            | "b" -> ret [ GainDistance(hero.id, 1) ]
             | "t" -> attackWeakest
             | "s" -> attackAll
             | "q" -> ret [ Quit ]
