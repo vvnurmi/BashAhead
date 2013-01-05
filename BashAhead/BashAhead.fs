@@ -67,14 +67,18 @@ let getUserActions () =
             | "q" -> ret [ Quit ]
             | _ -> ret []
     }
+let checkGameOver =
+    stateM {
+        let! gameOver = getGameOver
+        if gameOver then getCommand "Game over." |> ignore
+        return not gameOver
+    }
 let rec uiLoop () =
     stateM {
         clear ()
         do! showState
-        let! gameOver = getGameOver
-        if gameOver then
-            getCommand "Game over." |> ignore
-        else
+        let! ok = checkGameOver
+        if ok then
             let! userActions = getUserActions ()
             if not <| List.exists (fun a -> a = Quit) userActions then
                 let! gameActions = getGameActions
