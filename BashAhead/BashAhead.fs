@@ -59,8 +59,7 @@ let showState =
     }
 let getUserActions () =
     stateM {
-        printPrompt <| StrColor("Thrust, Swing, Quit? ", Color.White)
-        let command = getCommand ()
+        let command = getCommand "Thrust, Swing, Quit?"
         return!
             match command with
             | "t" -> attackWeakest
@@ -74,8 +73,7 @@ let rec uiLoop () =
         do! showState
         let! gameOver = getGameOver
         if gameOver then
-            printPrompt <| StrColor("Game over.", Color.White)
-            promptUser ()
+            getCommand "Game over." |> ignore
         else
             let! userActions = getUserActions ()
             if not <| List.exists (fun a -> a = Quit) userActions then

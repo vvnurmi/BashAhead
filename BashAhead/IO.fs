@@ -48,10 +48,7 @@ and formatTable context cellWidths = function
     | [] -> []
 
 // Public interface
-let getCommand () =
-    Console.ReadLine().PadRight(1).Substring(0, 1).ToLowerInvariant()
-let promptUser () =
-    getCommand () |> ignore
+let clear = Console.Clear
 let rec print context elem =
     let printCore fmt =
         setContext fmt.context
@@ -59,7 +56,10 @@ let rec print context elem =
     let fmts = format context elem
     List.iter printCore fmts
     setContext context
-let printPrompt = print { x = 0; y = 20; color = Color.White }
 let printStatus = print { x = 0; y = 0; color = Color.Gray }
 let printMessages = print { x = 0; y = 10; color = Color.Gray }
-let clear = Console.Clear
+let getCommand prompt =
+    let c = { x = 0; y = 20; color = Color.White }
+    print c <| StrColor(prompt, Color.White)
+    print { c with x = c.x + prompt.Length + 1 } <| Str ""
+    Console.ReadLine().PadRight(1).Substring(0, 1).ToLowerInvariant()
