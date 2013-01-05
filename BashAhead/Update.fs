@@ -7,7 +7,11 @@ let getMonsterActions m =
     stateM {
         let! hero = getHero
         let weapon = Map.find m.weaponName Library.weapons
-        return [ Attack(m.id, hero.id, weapon.power) ]
+        return
+            match m.distance with
+            | d when d < weapon.rangeMin -> [ GainDistance(m.id, 1) ]
+            | d when d > weapon.rangeMax -> [ GainDistance(m.id, -1) ]
+            | _ -> [ Attack(m.id, hero.id, weapon.power) ]
     }
 let getGameActions =
     stateM {
@@ -16,15 +20,34 @@ let getGameActions =
     }
 let applyAction action =
     stateM {
-        return
-            match action with
-            | Attack(actor, target, power) -> [ WeaponKnown actor; GetHit(target, power) ]
-            | Quit -> failwith "Quit"
+        match action with
+        | Attack(actorId, targetId, power) ->
+            let! a = getCreature actorId
+            let! t = getCreature targetId
+            let distance = max a.distance t.distance
+            let w = Map.find a.weaponName Library.weapons
+            if w.rangeMin <= distance && distance <= w.rangeMax then
+                return [ WeaponKnown actorId; GetHit(targetId, power) ]
+            else
+                do! addMessage <| sprintf "%s misses." a.name
+                return []
+        | GainDistance(actorId, delta) ->
+            let! c = getCreature actorId
+            let! cType = identify actorId
+            match cType with
+            | Hero ->
+                let! monsters = getMonsters
+                return List.map (fun m -> Move(m.id, delta)) monsters
+            | Monster ->
+                return [ Move(actorId, delta) ]
+        | Quit ->
+            failwith "Quit"
+            return []
     }
 let getHitInfo = function
-    | x when x > 2<hp> -> "heavily"
-    | x when x > 1<hp> -> "moderately"
-    | x when x > 0<hp> -> "lightly"
+    | x when x >= 3<hp> -> "heavily"
+    | x when x >= 2<hp> -> "moderately"
+    | x when x >= 1<hp> -> "lightly"
     | _ -> "negligibly"
 let applyChange change =
     stateM {
@@ -37,6 +60,10 @@ let applyChange change =
             return if newHitpoints <= 0<hp> then [ Die victimId ] else []
         | WeaponKnown actorId ->
             do! updateCreature (fun actor -> { actor with weaponKnown = true }) actorId
+            return []
+        | Move(actorId, d) ->
+            do! updateCreature (fun actor ->
+                { actor with distance = max 0 actor.distance + d }) actorId
             return []
         | Die(victimId) ->
             let! cType = identify victimId

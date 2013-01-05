@@ -19,6 +19,7 @@ let createMonster =
             hitpoints = 12<hp>
             weaponName = chooseOne <| Array.map fst (Map.toArray Library.weapons)
             weaponKnown = false
+            distance = 10
         }
     }
 let createHero =
@@ -31,11 +32,12 @@ let createHero =
             hitpoints = 42<hp>
             weaponName = "sword"
             weaponKnown = true
+            distance = 0
         }
     }
 
 let formatCreature c =
-    let nameElem = Str(c.name)
+    let nameElem = Str <| (String.replicate c.distance " ") + c.name
     let hpElem =
         match c.hitpoints with
         | x when x > c.maxhitpoints -> StrColor("Brilliant", Color.White)
