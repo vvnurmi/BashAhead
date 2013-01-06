@@ -61,7 +61,18 @@ let showState =
     }
 let getAvailableCommands =
     stateM {
-        return [ "Advance"; "Back up"; "Thrust"; "Swing"; "Wait"; "Flee"; "Quit" ]
+        let! monsters = getMonsters
+        let! fleeOk = canHeroFlee
+        return [
+            if not monsters.IsEmpty then
+                if List.forall (fun m -> m.distance > 1) monsters then yield "Advance"
+                yield "Back up"
+                yield "Thrust"
+                yield "Swing"
+                if fleeOk then yield "Flee"
+            yield "Wait"
+            yield "Quit"
+        ]
     }
 let rec getUserActions () =
     let normalizeCommand (s : string) = s.PadRight(1).Substring(0, 1).ToLowerInvariant()
