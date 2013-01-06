@@ -62,4 +62,4 @@ let getCommand prompt =
     let c = { x = 0; y = 20; color = Color.White }
     print c <| StrColor(prompt, Color.White)
     print { c with x = c.x + prompt.Length + 1 } <| Str ""
-    Console.ReadLine().PadRight(1).Substring(0, 1).ToLowerInvariant()
+    Console.ReadLine()

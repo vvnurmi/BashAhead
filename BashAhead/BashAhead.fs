@@ -59,19 +59,27 @@ let showState =
         printMessages <| Table messageRows
         do! clearMessages
     }
-let getUserActions () =
+let getAvailableCommands =
     stateM {
-        let command = getCommand "Advance, Back up, Thrust, Swing, Flee, Quit?"
+        return [ "Advance"; "Back up"; "Thrust"; "Swing"; "Wait"; "Flee"; "Quit" ]
+    }
+let rec getUserActions () =
+    let normalizeCommand (s : string) = s.PadRight(1).Substring(0, 1).ToLowerInvariant()
+    stateM {
+        let! commands = getAvailableCommands
+        let command = System.String.Join(", ", commands) + "?" |> getCommand |> normalizeCommand
         let! hero = getHero
-        return!
+        if List.exists (normalizeCommand >> (=) command) commands then
             match command with
-            | "a" -> ret [ GainDistance(hero.id, -1) ]
-            | "b" -> ret [ GainDistance(hero.id, 1) ]
-            | "f" -> ret [ Flee(hero.id) ]
-            | "t" -> attackWeakest
-            | "s" -> attackAll
-            | "q" -> ret [ Quit ]
-            | _ -> ret []
+            | "a" -> return [ GainDistance(hero.id, -1) ]
+            | "b" -> return [ GainDistance(hero.id, 1) ]
+            | "f" -> return [ Flee(hero.id) ]
+            | "t" -> return! attackWeakest
+            | "s" -> return! attackAll
+            | "w" -> return []
+            | "q" -> return [ Quit ]
+            | _ -> failwithf "Command %s missing" command; return []
+        else return! getUserActions ()
     }
 let checkGameOver =
     stateM {
