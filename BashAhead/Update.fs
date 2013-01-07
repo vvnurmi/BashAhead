@@ -4,14 +4,9 @@ open Types
 open State
 
 let fleeDistanceMin = 8
-let canFlee distance =
+let canFlee monsters =
+    let distance = monsters |> List.map (fun c -> c.distance) |> List.min
     distance >= fleeDistanceMin
-let canHeroFlee =
-    stateM {
-        let! monsters = getMonsters
-        let distance = monsters |> List.map (fun m -> m.distance) |> List.min
-        return canFlee distance
-    }
 
 let getMonsterActions m =
     stateM {
@@ -66,12 +61,12 @@ let applyAction action =
                 }
             match cType with
             | Hero ->
-                let! ok = canHeroFlee
-                return! tryFlee ok "You try to flee but monsters are too near."
+                let! monsters = getMonsters
+                return! tryFlee (canFlee monsters) "You try to flee but monsters are too near."
             | Monster ->
                 let! m = getCreature actorId
                 let failStr = sprintf "%s fails to escape your attention." m.name
-                return! tryFlee (canFlee m.distance) failStr
+                return! tryFlee (canFlee [ m ]) failStr
         | Quit ->
             failwith "Quit"
             return []

@@ -62,14 +62,13 @@ let showState =
 let getAvailableCommands =
     stateM {
         let! monsters = getMonsters
-        let! fleeOk = canHeroFlee
         return [
             if not monsters.IsEmpty then
                 if List.forall (fun m -> m.distance > 1) monsters then yield "Advance"
                 yield "Back up"
                 yield "Thrust"
                 yield "Swing"
-                if fleeOk then yield "Flee"
+                if canFlee monsters then yield "Flee"
             yield "Wait"
             yield "Quit"
         ]
