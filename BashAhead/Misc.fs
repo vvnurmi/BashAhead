@@ -9,3 +9,9 @@ let rec transpose = function
 let capitalize = function
     | "" -> ""
     | s -> s.Substring(0, 1).ToUpperInvariant() + s.Substring(1)
+let tryFindStart key map =
+    let startsWith (k : string) = k.StartsWith(key, System.StringComparison.InvariantCultureIgnoreCase)
+    match List.filter (fst >> startsWith) map with
+    | [ k, v ] -> Some v
+    | _ -> None
+    
