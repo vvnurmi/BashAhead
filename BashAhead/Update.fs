@@ -2,11 +2,7 @@
 
 open Types
 open State
-
-let fleeDistanceMin = 8
-let canFlee monsters =
-    let distance = monsters |> List.map (fun c -> c.distance) |> List.min
-    distance >= fleeDistanceMin
+open Conditions
 
 let getMonsterActions m =
     stateM {
@@ -134,22 +130,4 @@ let updateState actions =
     stateM {
         let! changes = adapt (fun op -> List.collect op actions) applyAction
         do! applyChanges changes
-    }
-
-let attackWeakest =
-    stateM {
-        let! hero = getHero
-        let weapon = Map.find hero.weaponName Library.weapons
-        let! monsters = getMonsters
-        return
-            match List.sortBy (fun m -> m.hitpoints) monsters with
-            | weakest :: _ -> [ Attack(hero.id, weakest.id, weapon.power) ]
-            | _ -> []
-    }
-let attackAll =
-    stateM {
-        let! hero = getHero
-        let weapon = Map.find hero.weaponName Library.weapons
-        let! monsters = getMonsters
-        return List.map (fun m -> Attack(hero.id, m.id, weapon.power * 2 / 3)) monsters
     }

@@ -1,8 +1,10 @@
 ﻿module BA
 
+open Misc
 open IO
 open Types
 open State
+open Commands
 open Update
 
 let state = stateUnit
@@ -59,42 +61,20 @@ let showState =
         printMessages <| Table messageRows
         do! clearMessages
     }
-let getAvailableCommands =
-    stateM {
-        let! monsters = getMonsters
-        return [
-            if not monsters.IsEmpty then
-                if List.forall (fun m -> m.distance > 1) monsters then yield "Advance"
-                yield "Back up"
-                yield "Thrust"
-                yield "Swing"
-                if canFlee monsters then yield "Flee"
-            yield "Wait"
-            yield "Quit"
-        ]
-    }
 let rec getUserActions () =
-    let normalizeCommand (s : string) = s.PadRight(1).Substring(0, 1).ToLowerInvariant()
     stateM {
-        let! commands = getAvailableCommands
-        let command = System.String.Join(", ", commands) + "?" |> getCommand |> normalizeCommand
-        let! hero = getHero
-        if List.exists (normalizeCommand >> (=) command) commands then
-            match command with
-            | "a" -> return [ GainDistance(hero.id, -1) ]
-            | "b" -> return [ GainDistance(hero.id, 1) ]
-            | "f" -> return [ Flee(hero.id) ]
-            | "t" -> return! attackWeakest
-            | "s" -> return! attackAll
-            | "w" -> return []
-            | "q" -> return [ Quit ]
-            | _ -> failwithf "Command %s missing" command; return []
-        else return! getUserActions ()
+        let commands = getCommands
+        let formatter = fun op -> Table <| List.map (fun c -> Row [ formatCommand op c ]) commands
+        let! promptFmt = adapt formatter testPrecondition
+        let command = getCommand promptFmt
+        match tryFindStart command <| List.map (fun c -> getName c, c) commands with
+        | Some c -> return! execute c
+        | None -> return! getUserActions ()
     }
 let checkGameOver =
     stateM {
         let! gameOver = getGameOver
-        if gameOver then getCommand "Game over." |> ignore
+        if gameOver then Str "Game over." |> getCommand |> ignore
         return not gameOver
     }
 let rec uiLoop () =
@@ -104,7 +84,7 @@ let rec uiLoop () =
         let! ok = checkGameOver
         if ok then
             let! userActions = getUserActions ()
-            if not <| List.exists (fun a -> a = Quit) userActions then
+            if not <| List.exists (fun a -> a = Action.Quit) userActions then
                 let! gameActions = getGameActions
                 do! updateState <| userActions @ gameActions
                 do! uiLoop ()

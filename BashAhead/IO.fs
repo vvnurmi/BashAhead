@@ -58,8 +58,9 @@ let rec print context elem =
     setContext context
 let printStatus = print { x = 0; y = 0; color = Color.Gray }
 let printMessages = print { x = 0; y = 10; color = Color.Gray }
-let getCommand prompt =
+let getCommand promptFmt =
     let c = { x = 0; y = 20; color = Color.White }
-    print c <| StrColor(prompt, Color.White)
-    print { c with x = c.x + prompt.Length + 1 } <| Str ""
+    print c promptFmt
+    let width, height = getSize promptFmt
+    print { c with x = c.x + width + 1; y = c.y + height - 1 } <| Str ""
     Console.ReadLine()
