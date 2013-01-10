@@ -67,7 +67,8 @@ let rec getUserActions () =
         let formatter = fun op -> Table <| List.map (formatCommand op) commands
         let! promptFmt = adapt formatter testPrecondition
         let command = getCommand promptFmt
-        match tryFindStart command <| List.map (fun c -> getName c, c) commands with
+        let! okCommands = adapt (fun op -> List.filter op commands) testPrecondition
+        match tryFindStart command <| List.map (fun c -> getName c, c) okCommands with
         | Some c -> return! execute c
         | None -> return! getUserActions ()
     }
