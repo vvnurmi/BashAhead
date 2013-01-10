@@ -43,11 +43,12 @@ let explainPrecondition = function
 let testPrecondition c =
     stateM {
         let! monsters = getMonsters
+        let! hero = getHero
         match c with
         | Advance -> return not monsters.IsEmpty && List.forall (fun m -> m.distance > 1) monsters
         | Flee -> return not monsters.IsEmpty && canFlee monsters
         | BackUp -> return not monsters.IsEmpty
-        | Thrust | Swing -> return not monsters.IsEmpty && List.exists (fun m -> 2 <= m.distance && m.distance <= 3) monsters
+        | Thrust | Swing -> return not monsters.IsEmpty && List.exists (isInRange hero.weaponName) monsters
         | _ -> return true
     }
 let formatCommand pred c =
@@ -60,8 +61,9 @@ let attackWeakest =
         let! hero = getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
+        let monstersInRange = List.filter (isInRange hero.weaponName) monsters
         return
-            match List.sortBy (fun m -> m.hitpoints) monsters with
+            match List.sortBy (fun m -> m.hitpoints) monstersInRange with
             | weakest :: _ -> [ Attack(hero.id, weakest.id, weapon.power) ]
             | _ -> []
     }
@@ -70,7 +72,8 @@ let attackAll =
         let! hero = getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
-        return List.map (fun m -> Attack(hero.id, m.id, weapon.power * 2 / 3)) monsters
+        let monstersInRange = List.filter (isInRange hero.weaponName) monsters
+        return List.map (fun m -> Attack(hero.id, m.id, weapon.power * 2 / 3)) monstersInRange
     }
 let execute command =
     stateM {
