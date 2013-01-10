@@ -52,9 +52,9 @@ let testPrecondition c =
     }
 let formatCommand pred c =
     if pred c then
-        StrColor(getName c, Color.White)
+        Row [ StrColor(getName c, Color.White); Str "" ]
     else
-        StrColor(explainPrecondition c, Color.DarkGray)
+        Row [ StrColor(getName c, Color.DarkGray); StrColor(explainPrecondition c, Color.DarkGray) ]
 let attackWeakest =
     stateM {
         let! hero = getHero

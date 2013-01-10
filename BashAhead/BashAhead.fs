@@ -64,7 +64,7 @@ let showState =
 let rec getUserActions () =
     stateM {
         let commands = getCommands
-        let formatter = fun op -> Table <| List.map (fun c -> Row [ formatCommand op c ]) commands
+        let formatter = fun op -> Table <| List.map (formatCommand op) commands
         let! promptFmt = adapt formatter testPrecondition
         let command = getCommand promptFmt
         match tryFindStart command <| List.map (fun c -> getName c, c) commands with
