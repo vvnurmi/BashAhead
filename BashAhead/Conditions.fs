@@ -10,3 +10,17 @@ let canFlee monsters =
 let isInRange weaponName monster =
     let weapon = Map.find weaponName Library.weapons
     weapon.rangeMin <= monster.distance && monster.distance <= weapon.rangeMax
+
+type HealthClass =
+    | Dead
+    | Critical
+    | Wounded
+    | Ok
+    | Brilliant
+let health maxHitpoints hitpoints =
+    match hitpoints with
+    | x when x > maxHitpoints -> Brilliant
+    | x when x = maxHitpoints -> Ok
+    | x when x > maxHitpoints / 2 -> Wounded
+    | x when x > 0<hp> -> Critical
+    | _ -> Dead

@@ -4,6 +4,7 @@ open Misc
 open IO
 open Types
 open State
+open Conditions
 open Commands
 open Update
 
@@ -41,12 +42,12 @@ let createHero =
 let formatCreature c =
     let nameElem = Str <| (String.replicate c.distance " ") + c.name
     let hpElem =
-        match c.hitpoints with
-        | x when x > c.maxhitpoints -> StrColor("Brilliant", Color.White)
-        | x when x = c.maxhitpoints -> StrColor("Ok", Color.Green)
-        | x when x > c.maxhitpoints / 2 -> StrColor("Wounded", Color.Yellow)
-        | x when x > 0<hp> -> StrColor("Critical", Color.Red)
-        | _ -> StrColor("Dead", Color.DarkGray)
+        match health c.maxhitpoints c.hitpoints with
+        | Brilliant -> StrColor("Brilliant", Color.White)
+        | Ok -> StrColor("Ok", Color.Green)
+        | Wounded -> StrColor("Wounded", Color.Yellow)
+        | Critical -> StrColor("Critical", Color.Red)
+        | Dead -> StrColor("Dead", Color.DarkGray)
     let weaponStr = if c.weaponKnown then c.weaponName else "???"
     let propertyElem = Str(sprintf "[%s]" weaponStr)
     Row [ nameElem; hpElem; propertyElem ]
