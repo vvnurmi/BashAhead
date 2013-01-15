@@ -32,3 +32,6 @@ type Change =
 type CreatureType =
     | Hero
     | Monster
+type AIState =
+    | AllAttack
+    | AllFlee

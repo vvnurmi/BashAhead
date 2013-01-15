@@ -4,25 +4,6 @@ open Types
 open State
 open Conditions
 
-let getMonsterActions m =
-    stateM {
-        let! hero = getHero
-        let weapon = Map.find m.weaponName Library.weapons
-        let doInRange x min max =
-            match m.distance with
-            | d when d < min -> [ GainDistance(m.id, 1) ]
-            | d when d > max -> [ GainDistance(m.id, -1) ]
-            | _ -> x
-        if m.hitpoints < m.maxhitpoints && m.hitpoints <= 8<hp> then
-            return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue
-        else
-            return doInRange [ Attack(m.id, hero.id, weapon.power) ] weapon.rangeMin weapon.rangeMax
-    }
-let getGameActions =
-    stateM {
-        let! monsters = getMonsters
-        return! adapt (fun op -> List.collect op monsters) getMonsterActions
-    }
 let applyAction action =
     stateM {
         match action with

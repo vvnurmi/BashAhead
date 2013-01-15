@@ -7,6 +7,7 @@ open State
 open Conditions
 open Commands
 open Update
+open AI
 
 let state = stateUnit
 let random = System.Random()
@@ -87,6 +88,7 @@ let rec uiLoop () =
         if ok then
             let! userActions = getUserActions ()
             if not <| List.exists (fun a -> a = Action.Quit) userActions then
+                do! updateAI
                 let! gameActions = getGameActions
                 do! updateState <| userActions @ gameActions
                 do! uiLoop ()

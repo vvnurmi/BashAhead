@@ -10,6 +10,7 @@ type StateT = {
     monsters : CreatureId list
     gameOver : bool
     messages : string list
+    aiState : AIState
 }
 type StateOp<'a> = StateOp of (StateT -> 'a * StateT)
 
@@ -20,6 +21,7 @@ let stateUnit = {
     monsters = []
     gameOver = false
     messages = []
+    aiState = AllAttack
 }
 
 let getNewId =
