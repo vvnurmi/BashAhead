@@ -88,9 +88,10 @@ let rec uiLoop () =
         if ok then
             let! userActions = getUserActions ()
             if not <| List.exists (fun a -> a = Action.Quit) userActions then
-                do! updateAI
                 let! gameActions = getGameActions
-                do! updateState <| userActions @ gameActions
+                let! changes = applyActions <| userActions @ gameActions
+                let! aiChanges = AI.getAIChanges
+                do! applyChanges <| changes @ aiChanges
                 do! uiLoop ()
     }
 let main =

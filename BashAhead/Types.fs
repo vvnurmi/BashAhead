@@ -18,6 +18,9 @@ type Creature = {
     weaponKnown : bool
     distance : int
 }
+type AIState =
+    | AllAttack
+    | AllFlee
 type Action =
     | Attack of CreatureId * CreatureId * int<hp> // actor * victim * power
     | GainDistance of CreatureId * int
@@ -29,9 +32,7 @@ type Change =
     | Move of CreatureId * int
     | Escape of CreatureId
     | Die of CreatureId
+    | ChangeTactic of AIState
 type CreatureType =
     | Hero
     | Monster
-type AIState =
-    | AllAttack
-    | AllFlee

@@ -13,7 +13,7 @@ let getMonsterActions m =
             | d when d < min -> [ GainDistance(m.id, 1) ]
             | d when d > max -> [ GainDistance(m.id, -1) ]
             | _ -> x
-        let! tactic = getState <| fun state -> state.aiState
+        let! tactic = getAIState
         match tactic with
         | AllFlee -> return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue
         | AllAttack -> return doInRange [ Attack(m.id, hero.id, weapon.power) ] weapon.rangeMin weapon.rangeMax
@@ -23,10 +23,10 @@ let getGameActions =
         let! monsters = getMonsters
         return! adapt (fun op -> List.collect op monsters) getMonsterActions
     }
-let updateAI =
+let getAIChanges =
     stateM {
         let! monsters = getMonsters
         let criticals = List.filter (fun m -> health m.maxhitpoints m.hitpoints <= Critical) monsters
         let panic = criticals.Length > monsters.Length / 2
-        do! mapState <| fun state -> { state with aiState = if panic then AllFlee else AllAttack }
+        return [ ChangeTactic <| if panic then AllFlee else AllAttack ]
     }

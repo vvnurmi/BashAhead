@@ -92,6 +92,9 @@ let applyChange change =
                 do! addMessage <| sprintf "Life escapes %s!" c.name
                 do! removeMonster victimId
             return []
+        | ChangeTactic tactic ->
+            do! setAIState tactic
+            return []
     }
 let preprocessChanges =
     let deaths = ref Set.empty
@@ -107,8 +110,7 @@ let rec applyChanges changes =
         let! changes = adapt (fun op -> List.collect op changes) applyChange
         if not changes.IsEmpty then do! changes |> preprocessChanges |> applyChanges 
     }
-let updateState actions =
+let applyActions actions =
     stateM {
-        let! changes = adapt (fun op -> List.collect op actions) applyAction
-        do! applyChanges changes
+        return! adapt (fun op -> List.collect op actions) applyAction
     }

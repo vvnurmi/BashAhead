@@ -126,3 +126,7 @@ let addMessage m =
     mapState <| fun state -> { state with messages = capitalize m :: state.messages }
 let clearMessages =
     mapState <| fun state -> { state with messages = [] }
+let getAIState =
+    getState <| fun state -> state.aiState
+let setAIState s =
+    mapState <| fun state -> { state with aiState = s }
