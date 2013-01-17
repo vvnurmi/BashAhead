@@ -97,7 +97,15 @@ let applyChange change =
                 do! removeMonster victimId
             return []
         | ChangeTactic tactic ->
+            let! oldTactic = getAIState
             do! setAIState tactic
+            if oldTactic <> tactic then
+                let tacticStr =
+                    match tactic with
+                    | AllIdle -> "The monsters stand idly."
+                    | AllAttack -> "The monsters charge to attack!"
+                    | AllFlee -> "The monsters flee in panic!"
+                do! addMessage <| sprintf "%s" tacticStr
             return []
     }
 let preprocessChanges =

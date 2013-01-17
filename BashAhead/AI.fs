@@ -15,6 +15,7 @@ let getMonsterActions m =
             | _ -> x
         let! tactic = getAIState
         match tactic with
+        | AllIdle -> return []
         | AllFlee -> return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue
         | AllAttack -> return doInRange [ Attack(m.id, hero.id, weapon.power) ] weapon.rangeMin weapon.rangeMax
     }

@@ -19,6 +19,7 @@ type Creature = {
     distance : int
 }
 type AIState =
+    | AllIdle
     | AllAttack
     | AllFlee
 type Action =

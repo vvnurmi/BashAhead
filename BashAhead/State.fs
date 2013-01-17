@@ -21,7 +21,7 @@ let stateUnit = {
     monsters = []
     gameOver = false
     messages = []
-    aiState = AllAttack
+    aiState = AllIdle
 }
 
 let getNewId =
