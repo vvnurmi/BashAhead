@@ -15,8 +15,7 @@ let applyAction action =
             if w.rangeMin <= distance && distance <= w.rangeMax then
                 return [ WeaponKnown actorId; GetHit(targetId, power) ]
             else
-                do! addMessage <| sprintf "%s misses." a.name
-                return []
+                return [ Miss(actorId, targetId) ]
         | GainDistance(actorId, delta) ->
             let! c = getCreature actorId
             let! cType = identify actorId
@@ -28,22 +27,15 @@ let applyAction action =
                 return [ Move(actorId, delta) ]
         | Flee actorId ->
             let! cType = identify actorId
-            let tryFlee ok failStr =
-                stateM {
-                    if ok then
-                        return [ Escape actorId ]
-                    else
-                        do! addMessage failStr
-                        return []
-                }
+            let tryFlee ok =
+                if ok then [ Escape actorId ] else [ EscapeFail actorId ]
             match cType with
             | Hero ->
                 let! monsters = getMonsters
-                return! tryFlee (canFlee monsters) "You try to flee but monsters are too near."
+                return tryFlee <| canFlee monsters
             | Monster ->
                 let! m = getCreature actorId
-                let failStr = sprintf "%s fails to escape your attention." m.name
-                return! tryFlee (canFlee [ m ]) failStr
+                return tryFlee <| canFlee [ m ]
         | Quit ->
             failwith "Quit"
             return []
@@ -62,6 +54,11 @@ let applyChange change =
             do! setCreature victimId { victim with hitpoints = newHitpoints }
             do! addMessage <| sprintf "%s was hit %s." victim.name (getHitInfo power)
             return if newHitpoints <= 0<hp> then [ Die victimId ] else []
+        | Miss(actorId, targetId) ->
+            let! actor = getCreature actorId
+            let! target = getCreature targetId
+            do! addMessage <| sprintf "%s misses %s." actor.name target.name
+            return []
         | WeaponKnown actorId ->
             do! updateCreature (fun actor -> { actor with weaponKnown = true }) actorId
             return []
@@ -81,6 +78,13 @@ let applyChange change =
                 do! addMessage <| sprintf "%s flees!" c.name
                 do! removeMonster actorId
                 return []
+        | EscapeFail actorId ->
+            let! cType = identify actorId
+            let! m = getCreature actorId
+            match cType with
+            | Hero -> do! addMessage "You try to flee but monsters are too near."
+            | Monster -> do! addMessage <| sprintf "%s fails to escape your attention." m.name
+            return []
         | Die victimId ->
             let! cType = identify victimId
             match cType with

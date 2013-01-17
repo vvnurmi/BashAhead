@@ -28,9 +28,11 @@ type Action =
     | Quit
 type Change =
     | GetHit of CreatureId * int<hp>
+    | Miss of CreatureId * CreatureId // actor * target
     | WeaponKnown of CreatureId
     | Move of CreatureId * int
     | Escape of CreatureId
+    | EscapeFail of CreatureId
     | Die of CreatureId
     | ChangeTactic of AIState
 type CreatureType =
