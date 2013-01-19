@@ -64,7 +64,7 @@ let attackWeakest =
         let monstersInRange = List.filter (isInRange hero.weaponName) monsters
         return
             match List.sortBy (fun m -> m.hitpoints) monstersInRange with
-            | weakest :: _ -> [ Attack(hero.id, weakest.id, weapon.power) ]
+            | weakest :: _ -> [ Attack(hero.id, [ weakest.id ], weapon.power, Honorable) ]
             | _ -> []
     }
 let attackAll =
@@ -73,7 +73,7 @@ let attackAll =
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let monstersInRange = List.filter (isInRange hero.weaponName) monsters
-        return List.map (fun m -> Attack(hero.id, m.id, weapon.power * 2 / 3)) monstersInRange
+        return [ Attack(hero.id, List.map (fun m -> m.id) monstersInRange, weapon.power * 2 / 3, Inglorious) ]
     }
 let execute command =
     stateM {

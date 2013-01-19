@@ -17,7 +17,7 @@ let getMonsterActions m =
         match tactic with
         | AllIdle -> return []
         | AllFlee -> return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue
-        | AllAttack -> return doInRange [ Attack(m.id, hero.id, weapon.power) ] weapon.rangeMin weapon.rangeMax
+        | AllAttack -> return doInRange [ Attack(m.id, [ hero.id ], weapon.power, Honorable) ] weapon.rangeMin weapon.rangeMax
     }
 let getGameActions =
     stateM {

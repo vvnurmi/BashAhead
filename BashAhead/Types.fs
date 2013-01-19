@@ -22,8 +22,11 @@ type AIState =
     | AllIdle
     | AllAttack
     | AllFlee
+type Honor =
+    | Honorable
+    | Inglorious
 type Action =
-    | Attack of CreatureId * CreatureId * int<hp> // actor * victim * power
+    | Attack of CreatureId * CreatureId list * int<hp> * Honor // actor * victims * power * honor
     | GainDistance of CreatureId * int
     | Flee of CreatureId
     | Quit
@@ -36,6 +39,7 @@ type Change =
     | EscapeFail of CreatureId
     | Die of CreatureId
     | ChangeTactic of AIState
+    | HeroHonor of Honor
 type CreatureType =
     | Hero
     | Monster

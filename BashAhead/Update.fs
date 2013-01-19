@@ -7,15 +7,21 @@ open Conditions
 let applyAction action =
     stateM {
         match action with
-        | Attack(actorId, targetId, power) ->
+        | Attack(actorId, targetIds, power, honor) ->
             let! a = getCreature actorId
-            let! t = getCreature targetId
-            let distance = max a.distance t.distance
+            let! aType = identify actorId
+            let! targets = adapt (fun op -> List.map (fun id -> op id) targetIds) getCreature
             let w = Map.find a.weaponName Library.weapons
-            if w.rangeMin <= distance && distance <= w.rangeMax then
-                return [ WeaponKnown actorId; GetHit(targetId, power) ]
-            else
-                return [ Miss(actorId, targetId) ]
+            let applyAttack t =
+                let distance = max a.distance t.distance
+                if w.rangeMin <= distance && distance <= w.rangeMax then
+                    [ WeaponKnown actorId; GetHit(t.id, power) ]
+                else
+                    [ Miss(actorId, t.id) ]
+            let changes = List.collect applyAttack targets
+            match aType with
+            | Hero -> return HeroHonor honor :: changes
+            | Monster -> return changes
         | GainDistance(actorId, delta) ->
             let! c = getCreature actorId
             let! cType = identify actorId
@@ -39,6 +45,14 @@ let applyAction action =
         | Quit ->
             failwith "Quit"
             return []
+    }
+
+let mapStateWithMessage get set describe value =
+    stateM {
+        let! oldValue = get
+        do! set value
+        let newValue = get
+        if oldValue <> value then do! addMessage <| sprintf "%s" (describe value)
     }
 let getHitInfo = function
     | x when x >= 3<hp> -> "heavily"
@@ -97,17 +111,20 @@ let applyChange change =
                 do! removeMonster victimId
             return []
         | ChangeTactic tactic ->
-            let! oldTactic = getAIState
-            do! setAIState tactic
-            if oldTactic <> tactic then
-                let tacticStr =
-                    match tactic with
-                    | AllIdle -> "The monsters stand idly."
-                    | AllAttack -> "The monsters charge to attack!"
-                    | AllFlee -> "The monsters flee in panic!"
-                do! addMessage <| sprintf "%s" tacticStr
+            let describe = function
+                | AllIdle -> "The monsters stand idly."
+                | AllAttack -> "The monsters charge to attack!"
+                | AllFlee -> "The monsters flee in panic!"
+            do! mapStateWithMessage getAIState setAIState describe tactic
+            return []
+        | HeroHonor honor ->
+            let describe = function
+                | Honorable -> "You are acting honorably!"
+                | Inglorious -> "Your actions are disgraceful!"
+            do! mapStateWithMessage getHeroHonor setHeroHonor describe honor
             return []
     }
+
 let preprocessChanges =
     let deaths = ref Set.empty
     let changeFilter = function

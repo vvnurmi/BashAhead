@@ -7,6 +7,7 @@ type StateT = {
     nextId : int
     creatures : Map<CreatureId, Creature>
     hero : CreatureId option
+    heroHonor : Honor
     monsters : CreatureId list
     gameOver : bool
     messages : string list
@@ -18,6 +19,7 @@ let stateUnit = {
     nextId = 0
     creatures = Map.empty
     hero = None
+    heroHonor = Honorable
     monsters = []
     gameOver = false
     messages = []
@@ -28,9 +30,8 @@ let getNewId =
     StateOp <| fun state ->
     state.nextId, { state with nextId = state.nextId + 1 }
 
-let run m state =
-    match m with
-    | StateOp f -> f state
+let run (StateOp f) state =
+    f state
 let ret a =
     StateOp <| fun state ->
     a, state
@@ -104,6 +105,10 @@ let setHero h =
         { state with
             hero = Some(h.id);
             creatures = Map.add h.id h state.creatures }
+let getHeroHonor =
+    getState <| fun state -> state.heroHonor
+let setHeroHonor h =
+    mapState <| fun state -> { state with heroHonor = h }
 let getMonsters =
     StateOp <| fun state ->
     run <| adapt (fun op -> List.map op state.monsters) getCreature <| state
