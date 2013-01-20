@@ -55,16 +55,15 @@ let formatCreature c =
 let formatMessages messages =
     List.map (fun m -> Row [ Str m ]) <| List.rev messages
 let showState =
-    rwState {
+    rState {
         let! heroRow = lift formatCreature getHero
         let! monsterRows = lift (List.map formatCreature) getMonsters
         let! messageRows = lift formatMessages getMessages
         printStatus <| Table(heroRow :: monsterRows)
         printMessages <| Table messageRows
-        do! clearMessages
     }
 let rec getUserActions () =
-    rwState {
+    rState {
         let commands = getCommands
         let! commandOks = adapt2 List.map testPrecondition commands
         let promptFmt = Table <| List.map2 formatCommand commands commandOks
@@ -75,7 +74,7 @@ let rec getUserActions () =
         | None -> return! getUserActions ()
     }
 let checkGameOver =
-    rwState {
+    rState {
         let! gameOver = getGameOver
         if gameOver then Str "Game over." |> getCommand |> ignore
         return not gameOver
@@ -84,6 +83,7 @@ let rec uiLoop () =
     rwState {
         clear ()
         do! showState
+        do! clearMessages
         let! ok = checkGameOver
         if ok then
             let! userActions = getUserActions ()

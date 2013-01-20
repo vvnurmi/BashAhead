@@ -81,7 +81,7 @@ let getNewId =
     StateOp <| fun state ->
     state.nextId, { state with nextId = state.nextId + 1 }
 let identify id =
-    rwState {
+    rState {
         let! isHero = getState <| fun state -> Some id = state.hero
         return if isHero then Hero else Monster
     }
@@ -97,7 +97,7 @@ let updateCreature f id =
         do! setCreature id (f c)
     }
 let getHero =
-    rwState {
+    rState {
         let! hero = getState <| fun state -> state.hero
         match hero with
         | Some c -> return! getCreature c
