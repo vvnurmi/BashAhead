@@ -41,7 +41,7 @@ let explainPrecondition = function
     | Wait -> ""
     | Quit -> ""
 let testPrecondition c =
-    stateM {
+    rwState {
         let! monsters = getMonsters
         let! hero = getHero
         match c with
@@ -51,13 +51,13 @@ let testPrecondition c =
         | Thrust | Swing -> return not monsters.IsEmpty && List.exists (isInRange hero.weaponName) monsters
         | _ -> return true
     }
-let formatCommand pred c =
-    if pred c then
+let formatCommand c active =
+    if active then
         Row [ StrColor(getName c, Color.White); Str "" ]
     else
         Row [ StrColor(getName c, Color.DarkGray); StrColor(explainPrecondition c, Color.DarkGray) ]
 let attackWeakest =
-    stateM {
+    rwState {
         let! hero = getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
@@ -68,7 +68,7 @@ let attackWeakest =
             | _ -> []
     }
 let attackAll =
-    stateM {
+    rwState {
         let! hero = getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
@@ -76,7 +76,7 @@ let attackAll =
         return [ Attack(hero.id, List.map (fun m -> m.id) monstersInRange, weapon.power * 2 / 3, Inglorious) ]
     }
 let execute command =
-    stateM {
+    rwState {
         let! hero = getHero
         match command with
         | Advance -> return [ GainDistance(hero.id, -1) ]

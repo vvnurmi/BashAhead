@@ -14,7 +14,7 @@ let random = System.Random()
 let chooseOne (list : string []) = list.[random.Next list.Length]
 
 let createMonster =
-    stateM {
+    rwState {
         let! id = getNewId
         return {
             id = id
@@ -27,7 +27,7 @@ let createMonster =
         }
     }
 let createHero =
-    stateM {
+    rwState {
         let! id = getNewId
         return {
             id = id
@@ -55,7 +55,7 @@ let formatCreature c =
 let formatMessages messages =
     List.map (fun m -> Row [ Str m ]) <| List.rev messages
 let showState =
-    stateM {
+    rwState {
         let! heroRow = lift formatCreature getHero
         let! monsterRows = lift (List.map formatCreature) getMonsters
         let! messageRows = lift formatMessages getMessages
@@ -64,24 +64,24 @@ let showState =
         do! clearMessages
     }
 let rec getUserActions () =
-    stateM {
+    rwState {
         let commands = getCommands
-        let formatter = fun op -> Table <| List.map (formatCommand op) commands
-        let! promptFmt = adapt formatter testPrecondition
+        let! commandOks = adapt2 List.map testPrecondition commands
+        let promptFmt = Table <| List.map2 formatCommand commands commandOks
         let command = getCommand promptFmt
-        let! okCommands = adapt (fun op -> List.filter op commands) testPrecondition
+        let! okCommands = adapt2 List.filter testPrecondition commands
         match tryFindStart command <| List.map (fun c -> getName c, c) okCommands with
         | Some c -> return! execute c
         | None -> return! getUserActions ()
     }
 let checkGameOver =
-    stateM {
+    rwState {
         let! gameOver = getGameOver
         if gameOver then Str "Game over." |> getCommand |> ignore
         return not gameOver
     }
 let rec uiLoop () =
-    stateM {
+    rwState {
         clear ()
         do! showState
         let! ok = checkGameOver
@@ -95,7 +95,7 @@ let rec uiLoop () =
                 do! uiLoop ()
     }
 let main =
-    stateM {
+    rwState {
         let! hero = createHero
         do! setHero hero
         for i = 1 to 3 do
@@ -103,4 +103,4 @@ let main =
             do! addMonster monster
         do! uiLoop ()
     }
-let (_, finalState) = run main State.stateUnit
+let _, finalState = rwState.RunOp(main, State.stateUnit)

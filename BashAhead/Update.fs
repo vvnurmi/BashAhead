@@ -5,12 +5,12 @@ open State
 open Conditions
 
 let applyAction action =
-    stateM {
+    rwState {
         match action with
         | Attack(actorId, targetIds, power, honor) ->
             let! a = getCreature actorId
             let! aType = identify actorId
-            let! targets = adapt (fun op -> List.map (fun id -> op id) targetIds) getCreature
+            let! targets = adapt2 List.map getCreature targetIds
             let w = Map.find a.weaponName Library.weapons
             let applyAttack t =
                 let distance = max a.distance t.distance
@@ -48,7 +48,7 @@ let applyAction action =
     }
 
 let mapStateWithMessage get set describe value =
-    stateM {
+    rwState {
         let! oldValue = get
         do! set value
         let newValue = get
@@ -60,7 +60,7 @@ let getHitInfo = function
     | x when x >= 1<hp> -> "lightly"
     | _ -> "negligibly"
 let applyChange change =
-    stateM {
+    rwState {
         match change with
         | GetHit(victimId, power) ->
             let! victim = getCreature victimId
@@ -135,11 +135,11 @@ let preprocessChanges =
         | _ -> true
     List.filter changeFilter
 let rec applyChanges changes =
-    stateM {
-        let! changes = adapt (fun op -> List.collect op changes) applyChange
+    rwState {
+        let! changes = adapt2 List.collect applyChange changes
         if not changes.IsEmpty then do! changes |> preprocessChanges |> applyChanges 
     }
 let applyActions actions =
-    stateM {
-        return! adapt (fun op -> List.collect op actions) applyAction
+    rwState {
+        return! adapt2 List.collect applyAction actions
     }

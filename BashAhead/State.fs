@@ -15,6 +15,51 @@ type StateT = {
 }
 type StateOp<'a> = StateOp of (StateT -> 'a * StateT)
 
+[<AbstractClass>]
+type StateBuilderBase() =
+    abstract member RunOp : StateOp<'a> * StateT -> 'a * StateT
+    member x.Lift(f, mg) =
+        StateOp <| fun state ->
+        let gResult, state2 = x.RunOp(mg, state)
+        f gResult, state2
+    member x.Adapt2(f, op, a) =
+        StateOp <| fun state ->
+        let mutableState = ref state
+        let opAdapted b =
+            let rOp, newState = x.RunOp(op b, !mutableState)
+            mutableState := newState
+            rOp
+        f opAdapted a, !mutableState
+    member x.Bind(mf, g) =
+        StateOp <| fun state ->
+        let rf, state2 = x.RunOp(mf, state)
+        x.RunOp(g rf, state2)
+    member x.Combine(mf, mg) = x.Bind(mf, fun _ -> mg)
+    member x.Return(a) = StateOp <| fun state -> a, state
+    member x.ReturnFrom(mf) = StateOp <| fun state -> x.RunOp(mf, state)
+    member x.Zero() = StateOp <| fun state -> (), state
+    member x.For(s, f) = x.Adapt2(Seq.iter, f, s)
+    member x.Delay(f) = f ()
+
+/// Mutable state
+type RWStateBuilder() =
+    inherit StateBuilderBase()
+    override x.RunOp(StateOp f, state) = f state
+let rwState = RWStateBuilder()
+let lift f mg = rwState.Lift(f, mg)
+let adapt2 f op a = rwState.Adapt2(f, op, a)
+
+/// Read-only state
+type RStateBuilder() =
+    inherit StateBuilderBase()
+    override x.RunOp(StateOp f, state) =
+        let rf, state2 = f state
+#if DEBUG
+        if state <> state2 then failwith "Illegal state change"
+#endif
+        rf, state
+let rState = RStateBuilder()
+
 let stateUnit = {
     nextId = 0
     creatures = Map.empty
@@ -25,53 +70,6 @@ let stateUnit = {
     messages = []
     aiState = AllIdle
 }
-
-let getNewId =
-    StateOp <| fun state ->
-    state.nextId, { state with nextId = state.nextId + 1 }
-
-let run (StateOp f) state =
-    f state
-let ret a =
-    StateOp <| fun state ->
-    a, state
-let lift f gOp =
-    StateOp <| fun state ->
-    let gResult, state2 = run gOp state
-    f gResult, state2
-let adapt f op =
-    StateOp <| fun state ->
-    let mutableState = ref state
-    let op2 x =
-        let rOp, newState = run (op x) !mutableState
-        mutableState := newState
-        rOp
-    f op2, !mutableState
-
-type StateBuilder() =
-    member x.Bind(mf, g) =
-        StateOp <| fun state ->
-        let rf, state2 = run mf state
-        run (g rf) state2
-    member x.Combine(mf, mg) =
-        StateOp <| fun state ->
-        let rf, state2 = run mf state
-        run mg state2
-    member x.Return(a) =
-        ret a
-    member x.ReturnFrom(mf) =
-        StateOp <| fun state ->
-        run mf state
-    member x.Zero() =
-        StateOp <| fun state ->
-        (), state
-    member x.For(s, f) =
-        adapt (fun op -> Seq.iter op s) f
-    member x.Delay(f) = f ()
-
-let stateM = StateBuilder()
-
-
 let getState f =
     StateOp <| fun state ->
     f state, state
@@ -79,8 +77,11 @@ let mapState f =
     StateOp <| fun state ->
     (), f state
 
+let getNewId =
+    StateOp <| fun state ->
+    state.nextId, { state with nextId = state.nextId + 1 }
 let identify id =
-    stateM {
+    rwState {
         let! isHero = getState <| fun state -> Some id = state.hero
         return if isHero then Hero else Monster
     }
@@ -91,15 +92,17 @@ let getCreature id =
 let setCreature id c =
     mapState <| fun state -> { state with creatures = Map.add id c state.creatures }
 let updateCreature f id =
-    stateM {
+    rwState {
         let! c = getCreature id
         do! setCreature id (f c)
     }
 let getHero =
-    StateOp <| fun state ->
-    match state.hero with
-    | Some c -> run (getCreature c) state
-    | _ -> failwith "Hero not defined"
+    rwState {
+        let! hero = getState <| fun state -> state.hero
+        match hero with
+        | Some c -> return! getCreature c
+        | _ -> return failwith "Hero not defined"
+    }
 let setHero h =
     mapState <| fun state ->
         { state with
@@ -110,8 +113,10 @@ let getHeroHonor =
 let setHeroHonor h =
     mapState <| fun state -> { state with heroHonor = h }
 let getMonsters =
-    StateOp <| fun state ->
-    run <| adapt (fun op -> List.map op state.monsters) getCreature <| state
+    rState {
+        let! monsterIds = getState <| fun state -> state.monsters
+        return! adapt2 List.map getCreature monsterIds
+    }
 let addMonster m =
     mapState <| fun state ->
         { state with

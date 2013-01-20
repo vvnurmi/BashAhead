@@ -5,7 +5,7 @@ open Conditions
 open State
 
 let getMonsterActions m =
-    stateM {
+    rwState {
         let! hero = getHero
         let weapon = Map.find m.weaponName Library.weapons
         let doInRange x min max =
@@ -20,12 +20,12 @@ let getMonsterActions m =
         | AllAttack -> return doInRange [ Attack(m.id, [ hero.id ], weapon.power, Honorable) ] weapon.rangeMin weapon.rangeMax
     }
 let getGameActions =
-    stateM {
+    rwState {
         let! monsters = getMonsters
-        return! adapt (fun op -> List.collect op monsters) getMonsterActions
+        return! adapt2 List.collect getMonsterActions monsters
     }
 let getAIChanges =
-    stateM {
+    rwState {
         let! monsters = getMonsters
         let criticals = List.filter (fun m -> health m.maxhitpoints m.hitpoints <= Critical) monsters
         let panic = criticals.Length > monsters.Length / 2
