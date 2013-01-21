@@ -20,6 +20,7 @@ type Creature = {
 }
 type AIState =
     | AllIdle
+    | OneAttack of CreatureId // attacker
     | AllAttack
     | AllFlee
 type Honor =

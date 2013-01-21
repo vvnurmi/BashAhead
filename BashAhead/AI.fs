@@ -14,10 +14,12 @@ let getMonsterActions m =
             | d when d > max -> [ GainDistance(m.id, -1) ]
             | _ -> x
         let! tactic = getAIState
+        let attack = doInRange [ Attack(m.id, [ hero.id ], weapon.power, Honorable) ] weapon.rangeMin weapon.rangeMax
         match tactic with
         | AllIdle -> return []
         | AllFlee -> return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue
-        | AllAttack -> return doInRange [ Attack(m.id, [ hero.id ], weapon.power, Honorable) ] weapon.rangeMin weapon.rangeMax
+        | AllAttack -> return attack
+        | OneAttack attackerId -> return if m.id = attackerId then attack else []
     }
 let getGameActions =
     rState {
@@ -27,7 +29,14 @@ let getGameActions =
 let getAIChanges =
     rState {
         let! monsters = getMonsters
-        let criticals = List.filter (fun m -> health m.maxhitpoints m.hitpoints <= Critical) monsters
-        let panic = criticals.Length > monsters.Length / 2
-        return [ ChangeTactic <| if panic then AllFlee else AllAttack ]
+        if monsters.IsEmpty then return [ ChangeTactic AllIdle ]
+        else
+            let criticals = List.filter (fun m -> health m.maxhitpoints m.hitpoints <= Critical) monsters
+            let panic = criticals.Length > monsters.Length / 2
+            let! heroHonor = getHeroHonor
+            let tactic =
+                match heroHonor with
+                | Honorable -> OneAttack monsters.[0].id
+                | Inglorious -> if panic then AllFlee else AllAttack
+            return [ ChangeTactic tactic ]
     }

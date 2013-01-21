@@ -52,7 +52,9 @@ let mapStateWithMessage get set describe value =
         let! oldValue = get
         do! set value
         let newValue = get
-        if oldValue <> value then do! addMessage <| sprintf "%s" (describe value)
+        if oldValue <> value then
+            let! description = describe value
+            do! addMessage <| sprintf "%s" description
     }
 let getHitInfo = function
     | x when x >= 3<hp> -> "heavily"
@@ -111,16 +113,25 @@ let applyChange change =
                 do! removeMonster victimId
             return []
         | ChangeTactic tactic ->
-            let describe = function
-                | AllIdle -> "The monsters stand idly."
-                | AllAttack -> "The monsters charge to attack!"
-                | AllFlee -> "The monsters flee in panic!"
+            let describe state =
+                rState {
+                    match state with
+                    | AllIdle -> return "The monsters stand idly."
+                    | AllAttack -> return "The monsters charge to attack!"
+                    | OneAttack mId ->
+                        let! m = getCreature mId
+                        return sprintf "%s challenges you!" m.name
+                    | AllFlee -> return "The monsters flee in panic!"
+                }
             do! mapStateWithMessage getAIState setAIState describe tactic
             return []
         | HeroHonor honor ->
-            let describe = function
-                | Honorable -> "You are acting honorably!"
-                | Inglorious -> "Your actions are disgraceful!"
+            let describe honor =
+                rState {
+                    match honor with
+                    | Honorable -> return "You are acting honorably!"
+                    | Inglorious -> return "Your actions are disgraceful!"
+                }
             do! mapStateWithMessage getHeroHonor setHeroHonor describe honor
             return []
     }
