@@ -87,7 +87,7 @@ let rec uiLoop () =
         let! ok = checkGameOver
         if ok then
             let! userActions = getUserActions ()
-            if not <| List.exists (fun a -> a = Action.Quit) userActions then
+            if not <| List.exists ((=) Action.Quit) userActions then
                 let! gameActions = getGameActions
                 let! changes = applyActions <| userActions @ gameActions
                 let! aiChanges = AI.getAIChanges

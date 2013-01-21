@@ -125,7 +125,7 @@ let addMonster m =
 let removeMonster id =
     mapState <| fun state ->
         { state with
-            monsters = List.filter (fun mId -> mId <> id) state.monsters }
+            monsters = List.filter ((<>) id) state.monsters }
 let getGameOver =
     getState <| fun state -> state.gameOver
 let setGameOver =
