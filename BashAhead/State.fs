@@ -30,6 +30,10 @@ type StateBuilderBase() =
             mutableState := newState
             rOp
         f opAdapted a, !mutableState
+    member x.Compose(f, g) = fun a ->
+        StateOp <| fun state ->
+        let rf, state2 = x.RunOp(f a, state)
+        x.RunOp(g rf, state2)
     member x.Bind(mf, g) =
         StateOp <| fun state ->
         let rf, state2 = x.RunOp(mf, state)
@@ -50,7 +54,7 @@ let lift f mg = rwState.Lift(f, mg)
 let adapt2 f op a = rwState.Adapt2(f, op, a)
 let (~%) a = rwState.Return a
 let (%|>) op opf = rwState.Bind(op, opf)
-let (%>>) op1 op2 = rwState.Combine(op1, op2)
+let (%>>) opf1 opf2 = rwState.Compose(opf1, opf2)
 
 /// Read-only state
 type RStateBuilder() =

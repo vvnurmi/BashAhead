@@ -4,7 +4,7 @@ open Types
 open State
 open Conditions
 
-let applyAction action =
+let handleAction action =
     rState {
         match action with
         | Attack(actorId, targetIds, power, honor) ->
@@ -151,6 +151,6 @@ let rec applyChanges changes =
         if not changes.IsEmpty then do! changes |> preprocessChanges |> applyChanges 
     }
 let applyActions actions =
-    rState {
-        return! adapt2 List.collect applyAction actions
+    rwState {
+        do! adapt2 List.iter (handleAction %>> applyChanges) actions
     }
