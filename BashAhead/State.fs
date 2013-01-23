@@ -48,6 +48,9 @@ type RWStateBuilder() =
 let rwState = RWStateBuilder()
 let lift f mg = rwState.Lift(f, mg)
 let adapt2 f op a = rwState.Adapt2(f, op, a)
+let (~%) a = rwState.Return a
+let (%|>) op opf = rwState.Bind(op, opf)
+let (%>>) op1 op2 = rwState.Combine(op1, op2)
 
 /// Read-only state
 type RStateBuilder() =
