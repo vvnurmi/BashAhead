@@ -24,6 +24,10 @@ let canLeap monsters =
         return minDistance <= distance && distance <= leapDistanceMax
     }
 
+let bounceDistanceMax = 2
+let canBounce monsters =
+    minDistance monsters <= bounceDistanceMax
+
 let isInRange weaponName monster =
     let weapon = Map.find weaponName Library.weapons
     weapon.rangeMin <= monster.distance && monster.distance <= weapon.rangeMax

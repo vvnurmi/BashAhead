@@ -11,6 +11,7 @@ type Command =
     | Thrust
     | Swing
     | Leap
+    | Bounce
     | Flee
     | Wait
     | Quit
@@ -23,6 +24,7 @@ let getCommands =
         Swing
         Leap
         Flee
+        Bounce
         Wait
         Quit
     ]
@@ -32,6 +34,7 @@ let getName = function
     | Thrust -> "Thrust"
     | Swing -> "Swing"
     | Leap -> "Leap"
+    | Bounce -> "Bounce off"
     | Flee -> "Flee"
     | Wait -> "Wait"
     | Quit -> "Quit"
@@ -44,6 +47,7 @@ let explainPrecondition command =
         | Leap ->
             let! minDistance = leapDistanceMin
             return sprintf "The closest monster must be at distance %i-%i" minDistance leapDistanceMax
+        | Bounce -> return sprintf "A monster must be at distance %i or closer" bounceDistanceMax
         | Flee -> return sprintf "No monster should be closer than %i" fleeDistanceMin
         | _ -> return ""
     }
@@ -55,6 +59,7 @@ let testPrecondition c =
         | Advance -> return not monsters.IsEmpty && List.forall (fun m -> m.distance > 1) monsters
         | Flee -> return not monsters.IsEmpty && canFlee monsters
         | Leap -> if monsters.IsEmpty then return false else return! canLeap monsters
+        | Bounce -> return not monsters.IsEmpty && canBounce monsters
         | BackUp -> return not monsters.IsEmpty
         | Thrust | Swing -> return not monsters.IsEmpty && List.exists (isInRange hero.weaponName) monsters
         | _ -> return true
@@ -99,6 +104,17 @@ let attackLeap =
             Attack(hero.id, [ target.id ], weapon.power, Honorable)
         ]
     }
+let attackBounce =
+    rState {
+        let! hero = getHero
+        let weapon = Map.find hero.weaponName Library.weapons
+        let! monsters = getMonsters
+        let target = List.minBy (fun m -> m.distance) monsters
+        return [
+            yield Attack(hero.id, [ target.id ], weapon.power / 2, Honorable)
+            if target.distance <= bounceDistanceMax then yield GainDistance(hero.id, 2)
+        ]
+    }
 let execute command =
     rState {
         let! hero = getHero
@@ -107,6 +123,7 @@ let execute command =
         | BackUp -> return [ GainDistance(hero.id, 1) ]
         | Flee -> return [ Action.Flee(hero.id) ]
         | Leap -> return! attackLeap
+        | Bounce -> return! attackBounce
         | Thrust -> return! attackWeakest
         | Swing -> return! attackAll
         | Wait -> return []
