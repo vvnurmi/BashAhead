@@ -7,14 +7,17 @@ open State
 let getMonsterActions m =
     rState {
         let! hero = getHero
-        let weapon = Map.find m.weaponName Library.weapons
+        let hWeapon = Map.find hero.weaponName Library.weapons
+        let mWeapon = Map.find m.weaponName Library.weapons
         let doInRange x min max =
             match m.distance with
             | d when d < min -> [ GainDistance(m.id, 1) ]
             | d when d > max -> [ GainDistance(m.id, -1) ]
+            | d when d <= hWeapon.rangeMax && hWeapon.rangeMax < max -> [ GainDistance(m.id, 1) ]
+            | d when min < hWeapon.rangeMin && hWeapon.rangeMin <= d -> [ GainDistance(m.id, -1) ]
             | _ -> x
         let! tactic = getAIState
-        let attack = doInRange [ Attack(m.id, [ hero.id ], weapon.power, Honorable) ] weapon.rangeMin weapon.rangeMax
+        let attack = doInRange [ Attack(m.id, [ hero.id ], mWeapon.power, Honorable) ] mWeapon.rangeMin mWeapon.rangeMax
         match tactic with
         | AllIdle -> return []
         | AllFlee -> return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue
