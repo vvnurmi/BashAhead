@@ -17,14 +17,14 @@ type Command =
 
 let getCommands =
     [
-        yield Advance
-        yield BackUp
-        yield Thrust
-        yield Swing
-        yield Leap
-        yield Flee
-        yield Wait
-        yield Quit
+        Advance
+        BackUp
+        Thrust
+        Swing
+        Leap
+        Flee
+        Wait
+        Quit
     ]
 let getName = function
     | Advance -> "Advance"
