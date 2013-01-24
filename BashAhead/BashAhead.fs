@@ -66,8 +66,8 @@ let rec getUserActions () =
     rState {
         let commands = getCommands
         let! commandOks = adapt2 List.map testPrecondition commands
-        let promptFmt = Table <| List.map2 formatCommand commands commandOks
-        let command = getCommand promptFmt
+        let! promptFmt = adapt3 List.map2 formatCommand commands commandOks
+        let command = getCommand <| Table promptFmt
         let! okCommands = adapt2 List.filter testPrecondition commands
         match tryFindStart command <| List.map (fun c -> getName c, c) okCommands with
         | Some c -> return! execute c

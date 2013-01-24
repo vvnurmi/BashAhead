@@ -35,15 +35,18 @@ let getName = function
     | Flee -> "Flee"
     | Wait -> "Wait"
     | Quit -> "Quit"
-let explainPrecondition = function
-    | Advance -> "No monster must stand in the way"
-    | BackUp -> ""
-    | Thrust -> "A monster must be at distance 2-3"
-    | Swing -> "Some monsters must be at distance 2-3"
-    | Leap -> sprintf "The closest monster must be at distance %i-%i" leapDistanceMin leapDistanceMax
-    | Flee -> sprintf "No monster should be closer than %i" fleeDistanceMin
-    | Wait -> ""
-    | Quit -> ""
+let explainPrecondition command =
+    rState {
+        match command with
+        | Advance -> return "No monster must stand in the way"
+        | Thrust -> return "A monster must be at distance 2-3"
+        | Swing -> return "Some monsters must be at distance 2-3"
+        | Leap ->
+            let! minDistance = leapDistanceMin
+            return sprintf "The closest monster must be at distance %i-%i" minDistance leapDistanceMax
+        | Flee -> return sprintf "No monster should be closer than %i" fleeDistanceMin
+        | _ -> return ""
+    }
 let testPrecondition c =
     rState {
         let! monsters = getMonsters
@@ -51,16 +54,19 @@ let testPrecondition c =
         match c with
         | Advance -> return not monsters.IsEmpty && List.forall (fun m -> m.distance > 1) monsters
         | Flee -> return not monsters.IsEmpty && canFlee monsters
-        | Leap -> return not monsters.IsEmpty && canLeap monsters
+        | Leap -> if monsters.IsEmpty then return false else return! canLeap monsters
         | BackUp -> return not monsters.IsEmpty
         | Thrust | Swing -> return not monsters.IsEmpty && List.exists (isInRange hero.weaponName) monsters
         | _ -> return true
     }
 let formatCommand c active =
-    if active then
-        Row [ StrColor(getName c, Color.White); Str "" ]
-    else
-        Row [ StrColor(getName c, Color.DarkGray); StrColor(explainPrecondition c, Color.DarkGray) ]
+    rState {
+        if active then
+            return Row [ StrColor(getName c, Color.White); Str "" ]
+        else
+            let! explanation = explainPrecondition c
+            return Row [ StrColor(getName c, Color.DarkGray); StrColor(explanation, Color.DarkGray) ]
+    }
 let attackWeakest =
     rState {
         let! hero = getHero
@@ -86,8 +92,10 @@ let attackLeap =
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let target = List.minBy (fun m -> m.distance) monsters
+        let! minDistance = leapDistanceMin
+        let distance = max minDistance (min leapDistanceMax <| target.distance - weapon.rangeMin)
         return [
-            GainDistance(hero.id, weapon.rangeMin - target.distance)
+            GainDistance(hero.id, -distance)
             Attack(hero.id, [ target.id ], weapon.power, Honorable)
         ]
     }
