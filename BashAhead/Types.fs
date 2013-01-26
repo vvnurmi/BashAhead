@@ -30,6 +30,7 @@ type Action =
     | Attack of CreatureId * CreatureId list * int<hp> * Honor // actor * victims * power * honor
     | GainDistance of CreatureId * int
     | Flee of CreatureId
+    | NextGroup
     | Quit
 type Change =
     | GetHit of CreatureId * int<hp>
@@ -41,6 +42,8 @@ type Change =
     | Die of CreatureId
     | ChangeTactic of AIState
     | HeroHonor of Honor
+    | IncMonsterCount
+    | CreateMonster
 type CreatureType =
     | Hero
     | Monster

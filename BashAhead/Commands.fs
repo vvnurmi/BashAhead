@@ -14,6 +14,7 @@ type Command =
     | Bounce
     | Flee
     | Wait
+    | NextGroup
     | Quit
 
 let getCommands =
@@ -26,6 +27,7 @@ let getCommands =
         Flee
         Bounce
         Wait
+        NextGroup
         Quit
     ]
 let getName = function
@@ -37,6 +39,7 @@ let getName = function
     | Bounce -> "Bounce off"
     | Flee -> "Flee"
     | Wait -> "Wait"
+    | NextGroup -> "Find more enemies"
     | Quit -> "Quit"
 let explainPrecondition command =
     rState {
@@ -127,5 +130,6 @@ let execute command =
         | Thrust -> return! attackWeakest
         | Swing -> return! attackAll
         | Wait -> return []
+        | NextGroup -> return [ Action.NextGroup ]
         | Quit -> return [ Action.Quit ]
     }

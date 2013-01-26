@@ -11,19 +11,6 @@ open AI
 
 let state = stateUnit
 
-let createMonster =
-    rwState {
-        let! id = getNewId
-        return {
-            id = id
-            name = chooseOne [| "orc"; "goblin"; "wolf" |]
-            maxhitpoints = 12<hp>
-            hitpoints = 12<hp>
-            weaponName = chooseOne <| Array.map fst (Map.toArray Library.weapons)
-            weaponKnown = false
-            distance = 10
-        }
-    }
 let createHero =
     rwState {
         let! id = getNewId
@@ -87,7 +74,7 @@ let rec uiLoop () =
             let! userActions = getUserActions ()
             if not <| List.exists ((=) Action.Quit) userActions then
                 do! applyActions userActions
-                do! AI.getAIChanges %|> applyChanges
+                do! getAIChanges %|> applyChanges
                 do! getGameActions %|> applyActions
                 do! uiLoop ()
     }
@@ -95,9 +82,6 @@ let main =
     rwState {
         let! hero = createHero
         do! setHero hero
-        for i = 1 to 3 do
-            let! monster = createMonster
-            do! addMonster monster
         do! uiLoop ()
     }
 let _, finalState = rwState.RunOp(main, State.stateUnit)

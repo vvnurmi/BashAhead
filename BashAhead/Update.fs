@@ -1,9 +1,23 @@
 ﻿module Update
 
+open Misc
 open Types
 open State
 open Conditions
 
+let createMonster =
+    rwState {
+        let! id = getNewId
+        return {
+            id = id
+            name = chooseOne [ "orc"; "goblin"; "wolf" ]
+            maxhitpoints = 12<hp>
+            hitpoints = 12<hp>
+            weaponName = chooseOne <| List.map fst (Map.toList Library.weapons)
+            weaponKnown = false
+            distance = 10
+        }
+    }
 let handleAction action =
     rState {
         match action with
@@ -42,6 +56,9 @@ let handleAction action =
             | Monster ->
                 let! m = getCreature actorId
                 return tryFlee <| canFlee [ m ]
+        | NextGroup ->
+            let! count = getMonsterCount
+            return IncMonsterCount :: List.replicate count CreateMonster
         | Quit ->
             failwith "Quit"
             return []
@@ -133,6 +150,14 @@ let applyChange change =
                     | Inglorious -> return "Your actions are disgraceful!"
                 }
             do! mapStateWithMessage getHeroHonor setHeroHonor describe honor
+            return []
+        | IncMonsterCount ->
+            let! count = getMonsterCount
+            do! setMonsterCount <| count + 1
+            return []
+        | CreateMonster ->
+            let! monster = createMonster
+            do! addMonster monster
             return []
     }
 

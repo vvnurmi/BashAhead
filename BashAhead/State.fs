@@ -12,6 +12,7 @@ type StateT = {
     gameOver : bool
     messages : string list
     aiState : AIState
+    monsterCount : int
 }
 type StateOp<'a> = StateOp of (StateT -> 'a * StateT)
 
@@ -85,6 +86,7 @@ let stateUnit = {
     gameOver = false
     messages = []
     aiState = AllIdle
+    monsterCount = 1
 }
 let getState f =
     StateOp <| fun state ->
@@ -156,3 +158,7 @@ let getAIState =
     getState <| fun state -> state.aiState
 let setAIState s =
     mapState <| fun state -> { state with aiState = s }
+let getMonsterCount =
+    getState <| fun state -> state.monsterCount
+let setMonsterCount n =
+    mapState <| fun state -> { state with monsterCount = n }
