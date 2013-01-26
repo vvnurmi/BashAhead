@@ -100,13 +100,14 @@ let attackWeakest =
             | weakest :: _ -> [ Attack(hero.id, [ weakest.id ], weapon.power, Honorable) ]
             | _ -> []
     }
-let attackAll =
+let attackSweep =
     rState {
         let! hero = getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
-        let monstersInRange = List.filter (isInRange hero.weaponName) monsters
-        return [ Attack(hero.id, List.map (fun m -> m.id) monstersInRange, weapon.power * 2 / 3, Inglorious) ]
+        let targets = monsters |> List.filter (isInRange hero.weaponName) |> Seq.truncate 4 |> Seq.toList
+        let honor = if targets.Length > 1 then Inglorious else Honorable
+        return [ Attack(hero.id, List.map (fun m -> m.id) targets, weapon.power * 2 / 3, honor) ]
     }
 let attackLeap =
     rState {
@@ -142,7 +143,7 @@ let execute command =
         | Leap -> return! attackLeap
         | Bounce -> return! attackBounce
         | Thrust -> return! attackWeakest
-        | Swing -> return! attackAll
+        | Swing -> return! attackSweep
         | Wait -> return []
         | NextGroup -> return [ Action.NextGroup ]
         | Quit -> return [ Action.Quit ]
