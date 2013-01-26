@@ -80,7 +80,7 @@ let applyChange change =
             return []
         | Move(actorId, d) ->
             do! updateCreature (fun actor ->
-                { actor with distance = max 0 actor.distance + d }) actorId
+                { actor with distance = max 0 (actor.distance + d) }) actorId
             return []
         | Escape actorId ->
             let! cType = identify actorId
