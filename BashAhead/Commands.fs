@@ -17,7 +17,7 @@ type Command =
     | NextGroup
     | Quit
 
-let getCommands =
+let monsterCommands = 
     [
         Advance
         BackUp
@@ -26,10 +26,24 @@ let getCommands =
         Leap
         Flee
         Bounce
-        Wait
+    ]
+let idleCommands =
+    [
         NextGroup
+    ]
+let systemCommands =
+    [
+        Wait
         Quit
     ]
+let getCommands =
+    rState {
+        let! monsters = getMonsters
+        return [
+            if monsters.IsEmpty then yield! idleCommands else yield! monsterCommands
+            yield! systemCommands
+        ]
+    }
 let getName = function
     | Advance -> "Advance"
     | BackUp -> "Back up"
