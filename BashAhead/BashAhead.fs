@@ -10,8 +10,6 @@ open Update
 open AI
 
 let state = stateUnit
-let random = System.Random()
-let chooseOne (list : string []) = list.[random.Next list.Length]
 
 let createMonster =
     rwState {

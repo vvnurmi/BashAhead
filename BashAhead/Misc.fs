@@ -1,5 +1,7 @@
 ﻿module Misc
 
+let random = System.Random()
+let chooseOne (list : 'a list) = list.[random.Next list.Length]
 let rec isConstant = function
     | a :: (b :: c as tail) -> a = b && isConstant tail
     | _ :: [] | [] -> true
