@@ -31,6 +31,7 @@ let formatCreature c =
         match health c.maxhitpoints c.hitpoints with
         | Brilliant -> StrColor("Brilliant", Color.White)
         | Ok -> StrColor("Ok", Color.Green)
+        | Bruised -> StrColor("Bruised", Color.Cyan)
         | Wounded -> StrColor("Wounded", Color.Yellow)
         | Critical -> StrColor("Critical", Color.Red)
         | Dead -> StrColor("Dead", Color.DarkGray)
