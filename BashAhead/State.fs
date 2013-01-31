@@ -8,6 +8,7 @@ type StateT = {
     creatures : Map<CreatureId, Creature>
     hero : CreatureId option
     heroHonor : Honor
+    heroHonorShift : Honor * int // tendency * amplitude
     monsters : CreatureId list
     gameOver : bool
     messages : string list
@@ -82,6 +83,7 @@ let stateUnit = {
     creatures = Map.empty
     hero = None
     heroHonor = Honorable
+    heroHonorShift = Honorable, 1
     monsters = []
     gameOver = false
     messages = []
@@ -130,6 +132,10 @@ let getHeroHonor =
     getState <| fun state -> state.heroHonor
 let setHeroHonor h =
     mapState <| fun state -> { state with heroHonor = h }
+let getHeroHonorShift =
+    getState <| fun state -> state.heroHonorShift
+let setHeroHonorShift hs =
+    mapState <| fun state -> { state with heroHonorShift = hs }
 let getMonsters =
     rState {
         let! monsterIds = getState <| fun state -> state.monsters

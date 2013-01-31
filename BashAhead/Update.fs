@@ -149,7 +149,16 @@ let applyChange change =
                     | Honorable -> return "You are acting honorably!"
                     | Inglorious -> return "Your actions are disgraceful!"
                 }
-            do! mapStateWithMessage getHeroHonor setHeroHonor describe honor
+            let! oldHonor = getHeroHonor
+            let! oldHonorShift = getHeroHonorShift
+            let newHonor, newHonorShift =
+                match oldHonorShift with
+                | x, n when x = honor && n >= 5 -> honor, (honor, 5)
+                | x, n when x = honor -> oldHonor, (honor, n + 1)
+                | x, 1 -> oldHonor, (honor, 1)
+                | x, n -> oldHonor, (x, n - 1)
+            do! mapStateWithMessage getHeroHonor setHeroHonor describe newHonor
+            do! setHeroHonorShift newHonorShift
             return []
         | IncMonsterCount ->
             let! count = getMonsterCount
