@@ -57,6 +57,7 @@ let rec print context elem =
     List.iter printCore fmts
     setContext context
 let printStatus = print { x = 0; y = 0; color = Color.Gray }
+let printAIState = print { x = 0; y = 9; color = Color.White }
 let printMessages = print { x = 0; y = 10; color = Color.Gray }
 let getCommand promptFmt =
     let c = { x = 0; y = 20; color = Color.White }

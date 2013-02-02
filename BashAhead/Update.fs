@@ -130,18 +130,7 @@ let applyChange change =
                 do! removeMonster victimId
             return []
         | ChangeTactic tactic ->
-            let describe state =
-                rState {
-                    match state with
-                    | AllIdle -> return "The monsters stand idly."
-                    | AllAttack -> return "The monsters charge to attack!"
-                    | OneAttack mId ->
-                        let! m = getCreature mId
-                        return sprintf "%s challenges you!" m.name
-                    | AllFlee -> return "The monsters flee in panic!"
-                    | AllSurrender -> return "The monsters surrender to your mercy!"
-                }
-            do! mapStateWithMessage getAIState setAIState describe tactic
+            do! setAIState tactic
             return []
         | HeroHonor honor ->
             let describe honor =

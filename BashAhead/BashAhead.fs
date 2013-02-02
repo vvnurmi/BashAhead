@@ -40,12 +40,26 @@ let formatCreature c =
     Row [ nameElem; hpElem; propertyElem ]
 let formatMessages messages =
     List.map (fun m -> Row [ Str m ]) <| List.rev messages
+let formatAIState =
+    rState {
+        let! state = getAIState
+        match state with
+        | AllIdle -> return "The monsters stand idly."
+        | AllAttack -> return "The monsters charge to attack!"
+        | OneAttack mId ->
+            let! m = getCreature mId
+            return capitalize <| sprintf "%s has challenged you!" m.name
+        | AllFlee -> return "The monsters flee in panic!"
+        | AllSurrender -> return "The monsters have surrendered to your mercy."
+    }
 let showState =
     rState {
         let! heroRow = lift formatCreature getHero
         let! monsterRows = lift (List.map formatCreature) getMonsters
+        let! aiStateRow = formatAIState
         let! messageRows = lift formatMessages getMessages
         printStatus <| Table(heroRow :: monsterRows)
+        printAIState <| Str aiStateRow
         printMessages <| Table messageRows
     }
 let rec getUserActions () =
