@@ -21,6 +21,7 @@ let getMonsterActions m =
         match tactic with
         | AllIdle -> return []
         | AllFlee -> return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue
+        | AllSurrender -> return []
         | AllAttack -> return attack
         | OneAttack attackerId -> return if m.id = attackerId then attack else []
     }
@@ -38,8 +39,10 @@ let getAIChanges =
             let panic = criticals.Length > monsters.Length / 2
             let! heroHonor = getHeroHonor
             let tactic =
-                match heroHonor with
-                | Honorable -> OneAttack monsters.[0].id
-                | Inglorious -> if panic then AllFlee else AllAttack
+                match heroHonor, panic with
+                | Honorable, false -> OneAttack monsters.[0].id
+                | Honorable, true -> AllSurrender
+                | Inglorious, false -> AllAttack
+                | Inglorious, true -> AllFlee
             return [ ChangeTactic tactic ]
     }

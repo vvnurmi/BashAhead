@@ -139,6 +139,7 @@ let applyChange change =
                         let! m = getCreature mId
                         return sprintf "%s challenges you!" m.name
                     | AllFlee -> return "The monsters flee in panic!"
+                    | AllSurrender -> return "The monsters surrender to your mercy!"
                 }
             do! mapStateWithMessage getAIState setAIState describe tactic
             return []

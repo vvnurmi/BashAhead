@@ -23,6 +23,7 @@ type AIState =
     | OneAttack of CreatureId // attacker
     | AllAttack
     | AllFlee
+    | AllSurrender
 type Honor =
     | Honorable
     | Inglorious
