@@ -115,8 +115,7 @@ let attackLeap =
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let target = List.minBy (fun m -> m.distance) monsters
-        let! minDistance = leapDistanceMin
-        let distance = max minDistance (min leapDistanceMax <| target.distance - weapon.rangeMin)
+        let distance = min leapDistanceMax <| target.distance - weapon.rangeMin
         return [
             GainDistance(hero.id, -distance)
             Attack(hero.id, [ target.id ], weapon.power, Honorable)
