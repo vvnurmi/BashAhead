@@ -1,4 +1,4 @@
-﻿module Library
+﻿module BashAhead.Library
 
 open Types
 

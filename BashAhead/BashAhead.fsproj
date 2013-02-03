@@ -49,7 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Misc.fs" />
-    <Compile Include="IO.fs" />
+    <Compile Include="ConsoleIO.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Library.fs" />
     <Compile Include="State.fs" />

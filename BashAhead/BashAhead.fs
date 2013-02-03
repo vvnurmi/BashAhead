@@ -1,7 +1,12 @@
-﻿module BA
+﻿module BashAhead.BA
+
+[<assembly:System.Runtime.InteropServices.ComVisible false>]
+[<assembly:System.Reflection.AssemblyVersion "1.0.*">]
+[<assembly:System.CLSCompliant true>]
+do ()
 
 open Misc
-open IO
+open ConsoleIO
 open Types
 open State
 open Conditions
@@ -17,7 +22,7 @@ let createHero =
         return {
             id = id
             name = "Hero"
-            maxhitpoints = 42<hp>
+            maxHitpoints = 42<hp>
             hitpoints = 42<hp>
             weaponName = "sword"
             weaponKnown = true
@@ -28,7 +33,7 @@ let createHero =
 let formatCreature c =
     let nameElem = Str <| (String.replicate c.distance " ") + c.name
     let hpElem =
-        match health c.maxhitpoints c.hitpoints with
+        match health c.maxHitpoints c.hitpoints with
         | Brilliant -> StrColor("Brilliant", Color.White)
         | Ok -> StrColor("Ok", Color.Green)
         | Bruised -> StrColor("Bruised", Color.Cyan)

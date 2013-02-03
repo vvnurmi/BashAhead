@@ -1,4 +1,4 @@
-﻿module Types
+﻿module BashAhead.Types
 
 [<Measure>] type hp
 
@@ -12,7 +12,7 @@ type CreatureId = int
 type Creature = {
     id : CreatureId
     name : string
-    maxhitpoints : int<hp>
+    maxHitpoints : int<hp>
     hitpoints : int<hp>
     weaponName : string
     weaponKnown : bool

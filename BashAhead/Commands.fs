@@ -1,6 +1,6 @@
-﻿module Commands
+﻿module BashAhead.Commands
 
-open IO
+open ConsoleIO
 open Types
 open State
 open Conditions

@@ -1,4 +1,4 @@
-﻿module AI
+﻿module BashAhead.AI
 
 open Types
 open Conditions
@@ -35,7 +35,7 @@ let getAIChanges =
         let! monsters = getMonsters
         if monsters.IsEmpty then return [ ChangeTactic AllIdle ]
         else
-            let criticals = List.filter (fun m -> health m.maxhitpoints m.hitpoints <= Critical) monsters
+            let criticals = List.filter (fun m -> health m.maxHitpoints m.hitpoints <= Critical) monsters
             let panic = criticals.Length > monsters.Length / 2
             let! heroHonor = getHeroHonor
             let tactic =

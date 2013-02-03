@@ -1,4 +1,4 @@
-﻿module Conditions
+﻿module BashAhead.Conditions
 
 open Types
 open State

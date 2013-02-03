@@ -1,4 +1,4 @@
-﻿module IO
+﻿module BashAhead.ConsoleIO
 
 open System
 open Misc

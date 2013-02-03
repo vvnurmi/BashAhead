@@ -1,4 +1,4 @@
-﻿module Update
+﻿module BashAhead.Update
 
 open Misc
 open Types
@@ -11,7 +11,7 @@ let createMonster =
         return {
             id = id
             name = chooseOne [ "orc"; "goblin"; "wolf" ]
-            maxhitpoints = 12<hp>
+            maxHitpoints = 12<hp>
             hitpoints = 12<hp>
             weaponName = chooseOne <| List.map fst (Map.toList Library.weapons)
             weaponKnown = false
