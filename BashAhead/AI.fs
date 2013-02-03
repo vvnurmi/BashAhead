@@ -17,7 +17,7 @@ let getMonsterActions m =
             | d when min < hWeapon.rangeMin && hWeapon.rangeMin <= d -> [ GainDistance(m.id, -1) ]
             | _ -> x
         let! tactic = getAIState
-        let attack = doInRange [ Attack(m.id, [ hero.id ], mWeapon.power, Honorable) ] mWeapon.rangeMin mWeapon.rangeMax
+        let attack = doInRange [ Attack(m.id, [ hero.id ], mWeapon.power) ] mWeapon.rangeMin mWeapon.rangeMax
         match tactic with
         | AllIdle -> return []
         | AllFlee -> return doInRange [ Flee m.id ] fleeDistanceMin System.Int32.MaxValue

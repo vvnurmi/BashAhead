@@ -97,7 +97,7 @@ let attackWeakest =
         let monstersInRange = List.filter (isInRange hero.weaponName) monsters
         return
             match List.sortBy (fun m -> m.hitpoints) monstersInRange with
-            | weakest :: _ -> [ Attack(hero.id, [ weakest.id ], weapon.power, Honorable) ]
+            | weakest :: _ -> [ Attack(hero.id, [ weakest.id ], weapon.power) ]
             | _ -> []
     }
 let attackSweep =
@@ -106,8 +106,7 @@ let attackSweep =
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let targets = monsters |> List.filter (isInRange hero.weaponName) |> Seq.truncate 4 |> Seq.toList
-        let honor = if targets.Length > 1 then Inglorious else Honorable
-        return [ Attack(hero.id, List.map (fun m -> m.id) targets, weapon.power * 2 / 3, honor) ]
+        return [ Attack(hero.id, List.map (fun m -> m.id) targets, weapon.power * 2 / 3) ]
     }
 let attackLeap =
     rState {
@@ -118,7 +117,7 @@ let attackLeap =
         let distance = min leapDistanceMax <| target.distance - weapon.rangeMin
         return [
             GainDistance(hero.id, -distance)
-            Attack(hero.id, [ target.id ], weapon.power, Honorable)
+            Attack(hero.id, [ target.id ], weapon.power)
         ]
     }
 let attackBounce =
@@ -128,7 +127,7 @@ let attackBounce =
         let! monsters = getMonsters
         let target = List.minBy (fun m -> m.distance) monsters
         return [
-            yield Attack(hero.id, [ target.id ], weapon.power / 2, Honorable)
+            yield Attack(hero.id, [ target.id ], weapon.power / 2)
             if target.distance <= bounceDistanceMax then yield GainDistance(hero.id, 2)
         ]
     }

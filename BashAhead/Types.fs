@@ -28,7 +28,7 @@ type Honor =
     | Honorable
     | Inglorious
 type Action =
-    | Attack of CreatureId * CreatureId list * int<hp> * Honor // actor * victims * power * honor
+    | Attack of CreatureId * CreatureId list * int<hp> // actor * victims * power
     | GainDistance of CreatureId * int
     | Flee of CreatureId
     | NextGroup
@@ -42,7 +42,7 @@ type Change =
     | EscapeFail of CreatureId
     | Die of CreatureId
     | ChangeTactic of AIState
-    | HeroHonor of Honor
+    | HeroHonor of Honor * int // type * amplitude
     | IncMonsterCount
     | CreateMonster
 type CreatureType =

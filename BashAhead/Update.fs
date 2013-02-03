@@ -21,19 +21,27 @@ let createMonster =
 let handleAction action =
     rState {
         match action with
-        | Attack(actorId, targetIds, power, honor) ->
-            let! a = getCreature actorId
-            let! aType = identify actorId
+        | Attack(actorId, [], power) ->
+            return []
+        | Attack(actorId, targetIds, power) ->
+            let! actor = getCreature actorId
+            let! actorType = identify actorId
             let! targets = adapt2 List.map getCreature targetIds
-            let w = Map.find a.weaponName Library.weapons
+            let w = Map.find actor.weaponName Library.weapons
             let applyAttack t =
-                let distance = max a.distance t.distance
+                let distance = max actor.distance t.distance
                 if w.rangeMin <= distance && distance <= w.rangeMax then
                     [ WeaponKnown actorId; GetHit(t.id, power) ]
                 else
                     [ Miss(actorId, t.id) ]
             let changes = List.collect applyAttack targets
-            match aType with
+            let! aiState = getAIState
+            let honor =
+                match aiState, targets.Length with
+                | AllSurrender, _ -> (Inglorious, 4)
+                | _, n when n > 1 -> (Inglorious, 1)
+                | _, _ -> (Honorable, 1)
+            match actorType with
             | Hero -> return HeroHonor honor :: changes
             | Monster -> return changes
         | GainDistance(actorId, delta) ->
@@ -132,7 +140,7 @@ let applyChange change =
         | ChangeTactic tactic ->
             do! setAIState tactic
             return []
-        | HeroHonor honor ->
+        | HeroHonor(honor, amplitude) ->
             let describe honor =
                 rState {
                     match honor with
@@ -143,10 +151,10 @@ let applyChange change =
             let! oldHonorShift = getHeroHonorShift
             let newHonor, newHonorShift =
                 match oldHonorShift with
-                | x, n when x = honor && n >= 5 -> honor, (honor, 5)
-                | x, n when x = honor -> oldHonor, (honor, n + 1)
-                | x, 1 -> oldHonor, (honor, 1)
-                | x, n -> oldHonor, (x, n - 1)
+                | x, n when x = honor && n + amplitude >= 5 -> honor, (honor, 5)
+                | x, n when x = honor -> oldHonor, (honor, n + amplitude)
+                | x, n when n - amplitude < 1 -> oldHonor, (honor, 1 + amplitude - n)
+                | x, n -> oldHonor, (x, n - amplitude)
             do! mapStateWithMessage getHeroHonor setHeroHonor describe newHonor
             do! setHeroHonorShift newHonorShift
             return []
