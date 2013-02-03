@@ -12,6 +12,7 @@ type Command =
     | Swing
     | Leap
     | Bounce
+    | Capture
     | Flee
     | Wait
     | NextGroup
@@ -26,6 +27,7 @@ let monsterCommands =
         Leap
         Flee
         Bounce
+        Capture
     ]
 let idleCommands =
     [
@@ -51,6 +53,7 @@ let getName = function
     | Swing -> "Swing"
     | Leap -> "Leap"
     | Bounce -> "Bounce off"
+    | Capture -> "Capture"
     | Flee -> "Flee"
     | Wait -> "Wait"
     | NextGroup -> "Find more enemies"
@@ -65,6 +68,7 @@ let explainPrecondition command =
             let! minDistance = leapDistanceMin
             return sprintf "The closest monster must be at distance %i-%i" minDistance leapDistanceMax
         | Bounce -> return sprintf "A monster must be at distance %i or closer" bounceDistanceMax
+        | Capture -> return sprintf "A discouraged monster must be at distance %i or closer" captureDistanceMax
         | Flee -> return sprintf "No monster should be closer than %i" fleeDistanceMin
         | _ -> return ""
     }
@@ -72,11 +76,13 @@ let testPrecondition c =
     rState {
         let! monsters = getMonsters
         let! hero = getHero
+        let! aiState = getAIState
         match c with
         | Advance -> return not monsters.IsEmpty && List.forall (fun m -> m.distance > 1) monsters
         | Flee -> return not monsters.IsEmpty && canFlee monsters
         | Leap -> if monsters.IsEmpty then return false else return! canLeap monsters
         | Bounce -> return not monsters.IsEmpty && canBounce monsters
+        | Capture -> return not monsters.IsEmpty && canCapture monsters aiState
         | BackUp -> return not monsters.IsEmpty
         | Thrust | Swing -> return not monsters.IsEmpty && List.exists (isInRange hero.weaponName) monsters
         | _ -> return true
@@ -131,6 +137,14 @@ let attackBounce =
             if target.distance <= bounceDistanceMax then yield GainDistance(hero.id, 2)
         ]
     }
+let attackCapture =
+    rState {
+        let! target = lift <| List.minBy (fun m -> m.distance) <| getMonsters
+        let! aiState = getAIState
+        match aiState with
+        | AllSurrender | AllFlee -> return [ Action.Capture target.id ]
+        | _ -> return []
+    }
 let execute command =
     rState {
         let! hero = getHero
@@ -140,6 +154,7 @@ let execute command =
         | Flee -> return [ Action.Flee(hero.id) ]
         | Leap -> return! attackLeap
         | Bounce -> return! attackBounce
+        | Capture -> return! attackCapture
         | Thrust -> return! attackWeakest
         | Swing -> return! attackSweep
         | Wait -> return []

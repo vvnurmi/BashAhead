@@ -53,6 +53,8 @@ let handleAction action =
                 return List.map (fun m -> Move(m.id, delta)) monsters
             | Monster ->
                 return [ Move(actorId, delta) ]
+        | Capture targetId ->
+            return [ GoAway targetId; HeroHonor(Honorable, 2) ]
         | Flee actorId ->
             let! cType = identify actorId
             let tryFlee ok =
@@ -136,6 +138,11 @@ let applyChange change =
                 let! c = getCreature victimId
                 do! addMessage <| sprintf "Life escapes %s!" c.name
                 do! removeMonster victimId
+            return []
+        | GoAway actorId ->
+            let! m = getCreature actorId
+            do! addMessage <| sprintf "You capture %s." m.name
+            do! removeMonster actorId
             return []
         | ChangeTactic tactic ->
             do! setAIState tactic

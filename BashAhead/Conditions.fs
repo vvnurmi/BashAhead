@@ -28,6 +28,10 @@ let bounceDistanceMax = 2
 let canBounce monsters =
     minDistance monsters <= bounceDistanceMax
 
+let captureDistanceMax = 2
+let canCapture monsters aiState =
+    (aiState = AllSurrender || aiState = AllFlee) && minDistance monsters <= captureDistanceMax
+
 let isInRange weaponName monster =
     let weapon = Map.find weaponName Library.weapons
     weapon.rangeMin <= monster.distance && monster.distance <= weapon.rangeMax
