@@ -9,3 +9,5 @@ let weapons =
         { name = "fangs"; power = 1<hp>; rangeMin = 1; rangeMax = 2 };
     ]
     weaponsList |> List.map (fun w -> w.name, w) |> Map.ofList
+let weaponNames =
+    weapons |> Map.toList |> List.map fst
