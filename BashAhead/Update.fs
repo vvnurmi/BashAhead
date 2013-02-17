@@ -1,6 +1,7 @@
 ﻿module BashAhead.Update
 
-open Misc
+open BashAhead.Common
+open BashAhead.Common.Misc
 open Types
 open State
 open Conditions

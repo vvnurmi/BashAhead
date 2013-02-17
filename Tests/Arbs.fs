@@ -1,7 +1,8 @@
-﻿module BashAhead.Arbs
+﻿module BashAhead.Tests.Arbs
 
 open FsCheck
-open Types
+open BashAhead.Common
+open BashAhead.Common.Types
 
 let creature hitpoints weaponName distance =
     {

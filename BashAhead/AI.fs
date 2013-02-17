@@ -1,5 +1,7 @@
 ﻿module BashAhead.AI
 
+open BashAhead.Common
+open BashAhead.Common.Types
 open Types
 open Conditions
 open State

@@ -5,8 +5,9 @@
 [<assembly:System.CLSCompliant true>]
 do ()
 
-open Misc
-open ConsoleIO
+open BashAhead.Common.Misc
+open BashAhead.Common.ConsoleIO
+open BashAhead.Common.Types
 open Types
 open State
 open Conditions

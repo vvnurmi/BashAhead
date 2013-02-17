@@ -1,6 +1,8 @@
 ﻿module BashAhead.Commands
 
-open ConsoleIO
+open BashAhead.Common
+open BashAhead.Common.ConsoleIO
+open BashAhead.Common.Types
 open Types
 open State
 open Conditions

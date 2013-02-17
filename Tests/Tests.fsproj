@@ -56,6 +56,11 @@
       <Project>{1e894f85-c1a7-4c6a-b808-be64eb8c9f6d}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{90a3b265-79a3-46a1-a6d3-8bc2cb27fbd5}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

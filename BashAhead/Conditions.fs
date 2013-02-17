@@ -1,5 +1,7 @@
 ﻿module BashAhead.Conditions
 
+open BashAhead.Common
+open BashAhead.Common.Types
 open Types
 open State
 

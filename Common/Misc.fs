@@ -1,4 +1,4 @@
-﻿module BashAhead.Misc
+﻿module BashAhead.Common.Misc
 
 let random = System.Random()
 let chooseOne (list : 'a list) = list.[random.Next list.Length]

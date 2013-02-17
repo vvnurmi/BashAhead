@@ -1,12 +1,13 @@
-﻿module BashAhead.Tests
+﻿module BashAhead.Tests.Tests
 
 open FsCheck
 open FsCheck.Commands
 open FsCheck.Prop
-open Types
-open State
-open Conditions
-open Update
+open BashAhead.Common.Types
+open BashAhead.Types
+open BashAhead.State
+open BashAhead.Conditions
+open BashAhead.Update
 
 type HeroHonorModel = Honor * int
 

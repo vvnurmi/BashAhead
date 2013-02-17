@@ -1,6 +1,7 @@
 ﻿module BashAhead.State
 
-open Misc
+open BashAhead.Common.Misc
+open BashAhead.Common.Types
 open Types
 
 type StateT = {
