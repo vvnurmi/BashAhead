@@ -1,4 +1,4 @@
-﻿module BashAhead.State
+﻿module BashAhead.Battle.State
 
 open BashAhead.Common.Misc
 open BashAhead.Common.Types

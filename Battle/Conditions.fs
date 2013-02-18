@@ -1,4 +1,4 @@
-﻿module BashAhead.Conditions
+﻿module BashAhead.Battle.Conditions
 
 open BashAhead.Common
 open BashAhead.Common.Types

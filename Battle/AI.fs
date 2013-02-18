@@ -1,4 +1,4 @@
-﻿module BashAhead.AI
+﻿module BashAhead.Battle.AI
 
 open BashAhead.Common
 open BashAhead.Common.Types

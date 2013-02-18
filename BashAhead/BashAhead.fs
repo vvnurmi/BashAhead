@@ -8,12 +8,12 @@ do ()
 open BashAhead.Common.Misc
 open BashAhead.Common.ConsoleIO
 open BashAhead.Common.Types
-open Types
-open State
-open Conditions
-open Commands
-open Update
-open AI
+open BashAhead.Battle.Types
+open BashAhead.Battle.State
+open BashAhead.Battle.Conditions
+open BashAhead.Battle.Commands
+open BashAhead.Battle.Update
+open BashAhead.Battle.AI
 
 let state = stateUnit
 
@@ -105,4 +105,4 @@ let main =
         do! setHero hero
         do! uiLoop ()
     }
-let _, finalState = rwState.RunOp(main, State.stateUnit)
+let _, finalState = rwState.RunOp(main, stateUnit)

@@ -1,4 +1,4 @@
-﻿module BashAhead.Types
+﻿module BashAhead.Battle.Types
 
 open BashAhead.Common.Types
 

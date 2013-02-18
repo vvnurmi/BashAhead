@@ -1,4 +1,4 @@
-﻿module BashAhead.Update
+﻿module BashAhead.Battle.Update
 
 open BashAhead.Common
 open BashAhead.Common.Misc

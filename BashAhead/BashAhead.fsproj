@@ -48,15 +48,14 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Types.fs" />
-    <Compile Include="State.fs" />
-    <Compile Include="Conditions.fs" />
-    <Compile Include="Commands.fs" />
-    <Compile Include="AI.fs" />
-    <Compile Include="Update.fs" />
     <Compile Include="BashAhead.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Battle\Battle.fsproj">
+      <Name>Battle</Name>
+      <Project>{757e5f37-ced3-43f6-8acb-d7ec82b0dad4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{90a3b265-79a3-46a1-a6d3-8bc2cb27fbd5}</Project>

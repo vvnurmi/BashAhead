@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>da131494-9525-4785-80a2-e4234992fdaa</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Tests</RootNamespace>
-    <AssemblyName>Tests</AssemblyName>
+    <ProjectGuid>757e5f37-ced3-43f6-8acb-d7ec82b0dad4</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Battle</RootNamespace>
+    <AssemblyName>Battle</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>Tests</Name>
+    <Name>Battle</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Tests.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Battle.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,13 +29,9 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Tests.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Battle.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FsCheck">
-      <HintPath>..\packages\FsCheck.0.8.3.0\lib\net40-Client\FsCheck.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -45,22 +41,14 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Arbs.fs" />
-    <Compile Include="Tests.fs" />
-    <None Include="packages.config" />
-    <None Include="app.config" />
+    <Compile Include="Types.fs" />
+    <Compile Include="State.fs" />
+    <Compile Include="Conditions.fs" />
+    <Compile Include="Commands.fs" />
+    <Compile Include="AI.fs" />
+    <Compile Include="Update.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BashAhead\BashAhead.fsproj">
-      <Name>BashAhead</Name>
-      <Project>{1e894f85-c1a7-4c6a-b808-be64eb8c9f6d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Battle\Battle.fsproj">
-      <Name>Battle</Name>
-      <Project>{757e5f37-ced3-43f6-8acb-d7ec82b0dad4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{90a3b265-79a3-46a1-a6d3-8bc2cb27fbd5}</Project>

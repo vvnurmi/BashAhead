@@ -1,4 +1,4 @@
-﻿module BashAhead.Commands
+﻿module BashAhead.Battle.Commands
 
 open BashAhead.Common
 open BashAhead.Common.ConsoleIO

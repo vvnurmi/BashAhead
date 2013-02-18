@@ -4,10 +4,10 @@ open FsCheck
 open FsCheck.Commands
 open FsCheck.Prop
 open BashAhead.Common.Types
-open BashAhead.Types
-open BashAhead.State
-open BashAhead.Conditions
-open BashAhead.Update
+open BashAhead.Battle.Types
+open BashAhead.Battle.State
+open BashAhead.Battle.Conditions
+open BashAhead.Battle.Update
 
 type HeroHonorModel = Honor * int
 
