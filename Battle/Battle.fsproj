@@ -47,6 +47,7 @@
     <Compile Include="Commands.fs" />
     <Compile Include="AI.fs" />
     <Compile Include="Update.fs" />
+    <Compile Include="ConsoleIO.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

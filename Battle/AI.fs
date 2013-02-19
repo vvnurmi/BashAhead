@@ -2,6 +2,7 @@
 
 open BashAhead.Common
 open BashAhead.Common.Types
+open BashAhead.Common.Conditions
 open Types
 open Conditions
 open State

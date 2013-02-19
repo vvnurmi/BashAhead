@@ -2,6 +2,8 @@
 
 open System
 open Misc
+open Types
+open Conditions
 
 type Color = ConsoleColor
 type FormatElement =
@@ -56,12 +58,25 @@ let rec print context elem =
     let fmts = format context elem
     List.iter printCore fmts
     setContext context
-let printStatus = print { x = 0; y = 0; color = Color.Gray }
-let printAIState = print { x = 0; y = 9; color = Color.White }
-let printMessages = print { x = 0; y = 10; color = Color.Gray }
 let getCommand promptFmt =
     let c = { x = 0; y = 20; color = Color.White }
     print c promptFmt
     let width, height = getSize promptFmt
     print { c with x = c.x + width + 1; y = c.y + height - 1 } <| Str ""
     Console.ReadLine()
+
+let formatCreature c =
+    let nameElem = Str <| (String.replicate c.distance " ") + c.name
+    let hpElem =
+        match health c.maxHitpoints c.hitpoints with
+        | Brilliant -> StrColor("Brilliant", Color.White)
+        | Ok -> StrColor("Ok", Color.Green)
+        | Bruised -> StrColor("Bruised", Color.Cyan)
+        | Wounded -> StrColor("Wounded", Color.Yellow)
+        | Critical -> StrColor("Critical", Color.Red)
+        | Dead -> StrColor("Dead", Color.DarkGray)
+    let weaponStr = if c.weaponKnown then c.weaponName else "???"
+    let propertyElem = Str(sprintf "[%s]" weaponStr)
+    Row [ nameElem; hpElem; propertyElem ]
+let formatMessages messages =
+    List.map (fun m -> Row [ Str m ]) <| List.rev messages
