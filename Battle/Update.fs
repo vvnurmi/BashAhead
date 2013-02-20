@@ -6,18 +6,15 @@ open Types
 open State
 open Conditions
 
-let createMonster =
-    rwState {
-        let! id = getNewId
-        return {
-            id = id
-            name = chooseOne [ "orc"; "goblin"; "wolf" ]
-            maxHitpoints = 12<hp>
-            hitpoints = 12<hp>
-            weaponName = chooseOne <| List.map fst (Map.toList Library.weapons)
-            weaponKnown = false
-            distance = 10
-        }
+let createMonster () =
+    {
+        id = 0
+        name = chooseOne [ "orc"; "goblin"; "wolf" ]
+        maxHitpoints = 12<hp>
+        hitpoints = 12<hp>
+        weaponName = chooseOne <| List.map fst (Map.toList Library.weapons)
+        weaponKnown = false
+        distance = 10
     }
 let handleAction action =
     rState {
@@ -171,8 +168,7 @@ let applyChange change =
             do! setMonsterCount <| count + 1
             return []
         | CreateMonster ->
-            let! monster = createMonster
-            do! addMonster monster
+            do! addMonster <| createMonster ()
             return []
     }
 

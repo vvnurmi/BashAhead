@@ -108,6 +108,13 @@ let identify id =
     }
 let isDead c =
     c.hitpoints <= 0<hp>
+let addCreature c =
+    rwState {
+        let! id = getNewId
+        let c = { c with id = id }
+        do! mapState <| fun state -> { state with creatures = Map.add id c state.creatures }
+        return id
+    }
 let getCreature id =
     getState <| fun state -> Map.find id state.creatures
 let setCreature id c =
@@ -125,10 +132,10 @@ let getHero =
         | _ -> return failwith "Hero not defined"
     }
 let setHero h =
-    mapState <| fun state ->
-        { state with
-            hero = Some(h.id);
-            creatures = Map.add h.id h state.creatures }
+    rwState {
+        let! id = addCreature h
+        do! mapState <| fun state -> { state with hero = Some id }
+    }
 let getHeroHonor =
     getState <| fun state -> state.heroHonor
 let setHeroHonor h =
@@ -142,11 +149,11 @@ let getMonsters =
         let! monsterIds = getState <| fun state -> state.monsters
         return! adapt2 List.map getCreature monsterIds
     }
-let addMonster m =
-    mapState <| fun state ->
-        { state with
-            monsters = m.id :: state.monsters;
-            creatures = Map.add m.id m state.creatures }
+let addMonster monster =
+    rwState {
+        let! id = addCreature monster
+        do! mapState <| fun state -> { state with monsters = id :: state.monsters }
+    }
 let removeMonster id =
     mapState <| fun state ->
         { state with

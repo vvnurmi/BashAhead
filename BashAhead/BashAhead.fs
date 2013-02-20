@@ -9,18 +9,15 @@ open BashAhead.Common.Types
 open BashAhead.Battle.State
 open BashAhead.Battle.ConsoleIO
 
-let createHero =
-    rwState {
-        let! id = getNewId
-        return {
-            id = id
-            name = "Hero"
-            maxHitpoints = 42<hp>
-            hitpoints = 42<hp>
-            weaponName = "sword"
-            weaponKnown = true
-            distance = 0
-        }
+let createHero () =
+    {
+        id = 0
+        name = "Hero"
+        maxHitpoints = 42<hp>
+        hitpoints = 42<hp>
+        weaponName = "sword"
+        weaponKnown = true
+        distance = 0
     }
 
 let rec uiLoop () =
@@ -30,8 +27,7 @@ let rec uiLoop () =
     }
 let main =
     rwState {
-        let! hero = createHero
-        do! setHero hero
+        do! setHero <| createHero ()
         do! uiLoop ()
     }
 let _, finalState = rwState.RunOp(main, stateUnit)
