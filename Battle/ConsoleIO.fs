@@ -19,7 +19,7 @@ let formatAIState =
         | AllIdle -> return "The monsters stand idly."
         | AllAttack -> return "The monsters charge to attack!"
         | OneAttack mId ->
-            let! m = getCreature mId
+            let! m = getMonster mId
             return capitalize <| sprintf "%s has challenged you!" m.name
         | AllFlee -> return "The monsters flee in panic!"
         | AllSurrender -> return "The monsters have surrendered to your mercy."

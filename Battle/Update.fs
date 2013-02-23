@@ -39,7 +39,7 @@ let handleAction action =
                 | _, _ -> (Honorable, 1)
             return HeroHonor honor :: changes
         | Attack(Monster id, [ Hero ], power) ->
-            let! actor = getCreature id
+            let! actor = getMonster id
             let w = Map.find actor.weaponName Library.weapons
             return WeaponKnown(Monster id) :: [ attack (Monster id) Hero w power actor.distance ]
         | Attack(_, _, _) ->
@@ -53,7 +53,7 @@ let handleAction action =
             let! monsters = getMonsters
             if canFlee monsters then return [ Escape Hero ] else return [ EscapeFail Hero ]
         | Flee(Monster id as m) ->
-            let! creature = getCreature id
+            let! creature = getMonster id
             if canFlee [ creature ] then return [ Escape m ] else return [ EscapeFail m ]
         | NextGroup ->
             let! count = getMonsterCount
@@ -103,7 +103,7 @@ let applyChange change =
             do! setGameOver
             return []
         | Escape(Monster id) ->
-            let! c = getCreature id
+            let! c = getMonster id
             do! addMessage <| sprintf "%s flees!" c.name
             do! removeMonster id
             return []
@@ -111,7 +111,7 @@ let applyChange change =
             do! addMessage "You try to flee but monsters are too near."
             return []
         | EscapeFail(Monster id) ->
-            let! c = getCreature id
+            let! c = getMonster id
             do! addMessage <| sprintf "%s fails to escape your attention." c.name
             return []
         | Die Hero ->
@@ -119,12 +119,12 @@ let applyChange change =
             do! setGameOver
             return []
         | Die(Monster id) ->
-            let! c = getCreature id
+            let! c = getMonster id
             do! addMessage <| sprintf "Life escapes %s!" c.name
             do! removeMonster id
             return []
         | GoAway id ->
-            let! c = getCreature id
+            let! c = getMonster id
             do! addMessage <| sprintf "You capture %s." c.name
             do! removeMonster id
             return []

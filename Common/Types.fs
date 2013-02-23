@@ -8,9 +8,9 @@ type Weapon = {
     rangeMin : int
     rangeMax : int
 }
-type CreatureId = int
+type MonsterId = int
 type Creature = {
-    id : CreatureId
+    id : MonsterId
     name : string
     maxHitpoints : int<hp>
     hitpoints : int<hp>

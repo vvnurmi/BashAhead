@@ -6,11 +6,10 @@ open Types
 
 type StateT = {
     nextId : int
-    creatures : Map<CreatureId, Creature>
+    monsters : Map<MonsterId, Creature>
     hero : Creature option
     heroHonor : Honor
     heroHonorShift : Honor * int // tendency * amplitude
-    monsters : CreatureId list
     gameOver : bool
     messages : string list
     aiState : AIState
@@ -81,11 +80,10 @@ let rState = RStateBuilder()
 
 let stateUnit = {
     nextId = 0
-    creatures = Map.empty
+    monsters = Map.empty
     hero = None
     heroHonor = Honorable
     heroHonorShift = Honorable, 1
-    monsters = []
     gameOver = false
     messages = []
     aiState = AllIdle
@@ -103,17 +101,20 @@ let getNewId =
     state.nextId, { state with nextId = state.nextId + 1 }
 let isDead c =
     c.hitpoints <= 0<hp>
-let addCreature c =
+
+let addMonster c =
     rwState {
         let! id = getNewId
         let c = { c with id = id }
-        do! mapState <| fun state -> { state with creatures = Map.add id c state.creatures }
-        return id
+        do! mapState <| fun state -> { state with monsters = Map.add id c state.monsters }
     }
-let getCreature id =
-    getState <| fun state -> Map.find id state.creatures
-let setCreature id c =
-    mapState <| fun state -> { state with creatures = Map.add id c state.creatures }
+let getMonster id =
+    getState <| fun state -> Map.find id state.monsters
+let setMonster id c =
+    mapState <| fun state -> { state with monsters = Map.add id c state.monsters }
+let removeMonster id =
+    mapState <| fun state -> { state with monsters = Map.remove id state.monsters }
+
 let getHero =
     rState {
         let! hero = getState <| fun state -> state.hero
@@ -125,6 +126,19 @@ let setHero h =
     rwState {
         do! mapState <| fun state -> { state with hero = Some h }
     }
+
+let getActor = function
+    | Monster c -> getMonster c
+    | Hero -> getHero
+let setActor c = function
+    | Monster id -> setMonster id c
+    | Hero -> setHero c
+let updateActor f actor =
+    rwState {
+        let! c = getActor actor
+        do! setActor (f c) actor
+    }
+
 let getHeroHonor =
     getState <| fun state -> state.heroHonor
 let setHeroHonor h =
@@ -135,28 +149,8 @@ let setHeroHonorShift hs =
     mapState <| fun state -> { state with heroHonorShift = hs }
 let getMonsters =
     rState {
-        let! monsterIds = getState <| fun state -> state.monsters
-        return! adapt2 List.map getCreature monsterIds
-    }
-let addMonster monster =
-    rwState {
-        let! id = addCreature monster
-        do! mapState <| fun state -> { state with monsters = id :: state.monsters }
-    }
-let removeMonster id =
-    mapState <| fun state ->
-        { state with
-            monsters = List.filter ((<>) id) state.monsters }
-let getActor = function
-    | Monster c -> getCreature c
-    | Hero -> getHero
-let setActor c = function
-    | Monster id -> setCreature id c
-    | Hero -> setHero c
-let updateActor f actor =
-    rwState {
-        let! c = getActor actor
-        do! setActor (f c) actor
+        let! monsters = getState <| fun state -> state.monsters
+        return List.map snd <| Map.toList monsters
     }
 let getGameOver =
     getState <| fun state -> state.gameOver
