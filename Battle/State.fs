@@ -7,7 +7,7 @@ open Types
 type StateT = {
     nextId : int
     creatures : Map<CreatureId, Creature>
-    hero : CreatureId option
+    hero : Creature option
     heroHonor : Honor
     heroHonorShift : Honor * int // tendency * amplitude
     monsters : CreatureId list
@@ -101,11 +101,6 @@ let mapState f =
 let getNewId =
     StateOp <| fun state ->
     state.nextId, { state with nextId = state.nextId + 1 }
-let identify id =
-    rState {
-        let! isHero = getState <| fun state -> Some id = state.hero
-        return if isHero then Hero else Monster
-    }
 let isDead c =
     c.hitpoints <= 0<hp>
 let addCreature c =
@@ -119,22 +114,16 @@ let getCreature id =
     getState <| fun state -> Map.find id state.creatures
 let setCreature id c =
     mapState <| fun state -> { state with creatures = Map.add id c state.creatures }
-let updateCreature f id =
-    rwState {
-        let! c = getCreature id
-        do! setCreature id (f c)
-    }
 let getHero =
     rState {
         let! hero = getState <| fun state -> state.hero
         match hero with
-        | Some c -> return! getCreature c
+        | Some h -> return h
         | _ -> return failwith "Hero not defined"
     }
 let setHero h =
     rwState {
-        let! id = addCreature h
-        do! mapState <| fun state -> { state with hero = Some id }
+        do! mapState <| fun state -> { state with hero = Some h }
     }
 let getHeroHonor =
     getState <| fun state -> state.heroHonor
@@ -158,6 +147,17 @@ let removeMonster id =
     mapState <| fun state ->
         { state with
             monsters = List.filter ((<>) id) state.monsters }
+let getActor = function
+    | Monster c -> getCreature c
+    | Hero -> getHero
+let setActor c = function
+    | Monster id -> setCreature id c
+    | Hero -> setHero c
+let updateActor f actor =
+    rwState {
+        let! c = getActor actor
+        do! setActor (f c) actor
+    }
 let getGameOver =
     getState <| fun state -> state.gameOver
 let setGameOver =

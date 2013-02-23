@@ -21,6 +21,3 @@ type Creature = {
 type Honor =
     | Honorable
     | Inglorious
-type CreatureType =
-    | Hero
-    | Monster

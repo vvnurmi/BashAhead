@@ -2,6 +2,9 @@
 
 open BashAhead.Common.Types
 
+type Actor =
+    | Hero
+    | Monster of CreatureId
 type AIState =
     | AllIdle
     | OneAttack of CreatureId // attacker
@@ -9,20 +12,20 @@ type AIState =
     | AllFlee
     | AllSurrender
 type Action =
-    | Attack of CreatureId * CreatureId list * int<hp> // actor * victims * power
+    | Attack of Actor * Actor list * int<hp> // attacker * victims * power
     | GainDistance of CreatureId * int
     | Capture of CreatureId
-    | Flee of CreatureId
+    | Flee of Actor
     | NextGroup
     | Quit
 type Change =
-    | GetHit of CreatureId * int<hp>
-    | Miss of CreatureId * CreatureId // actor * target
-    | WeaponKnown of CreatureId
+    | GetHit of Actor * int<hp>
+    | Miss of Actor * Actor // attacker * victim
+    | WeaponKnown of Actor
     | Move of CreatureId * int
-    | Escape of CreatureId
-    | EscapeFail of CreatureId
-    | Die of CreatureId
+    | Escape of Actor
+    | EscapeFail of Actor
+    | Die of Actor
     | GoAway of CreatureId
     | ChangeTactic of AIState
     | HeroHonor of Honor * int // type * amplitude

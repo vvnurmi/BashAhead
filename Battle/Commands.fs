@@ -97,6 +97,10 @@ let formatCommand c active =
             let! explanation = explainPrecondition c
             return Row [ StrColor(getName c, Color.DarkGray); StrColor(explanation, Color.DarkGray) ]
     }
+
+let gainDistance monsters distance =
+    List.map (fun m -> GainDistance(m.id, distance)) monsters
+
 let attackWeakest =
     rState {
         let! hero = getHero
@@ -105,7 +109,7 @@ let attackWeakest =
         let monstersInRange = List.filter (isInRange hero.weaponName) monsters
         return
             match List.sortBy (fun m -> m.hitpoints) monstersInRange with
-            | weakest :: _ -> [ Attack(hero.id, [ weakest.id ], weapon.power) ]
+            | weakest :: _ -> [ Attack(Hero, [ Monster weakest.id ], weapon.power) ]
             | _ -> []
     }
 let attackSweep =
@@ -114,7 +118,7 @@ let attackSweep =
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let targets = monsters |> List.filter (isInRange hero.weaponName) |> Seq.truncate 4 |> Seq.toList
-        return [ Attack(hero.id, List.map (fun m -> m.id) targets, weapon.power * 2 / 3) ]
+        return [ Attack(Hero, List.map (fun m -> Monster m.id) targets, weapon.power * 2 / 3) ]
     }
 let attackLeap =
     rState {
@@ -123,10 +127,8 @@ let attackLeap =
         let! monsters = getMonsters
         let target = List.minBy (fun m -> m.distance) monsters
         let distance = min leapDistanceMax <| target.distance - weapon.rangeMin
-        return [
-            GainDistance(hero.id, -distance)
-            Attack(hero.id, [ target.id ], weapon.power)
-        ]
+        let distanceGains = gainDistance monsters -distance
+        return distanceGains @ [ Attack(Hero, [ Monster target.id ], weapon.power) ]
     }
 let attackBounce =
     rState {
@@ -135,8 +137,8 @@ let attackBounce =
         let! monsters = getMonsters
         let target = List.minBy (fun m -> m.distance) monsters
         return [
-            yield Attack(hero.id, [ target.id ], weapon.power / 2)
-            if target.distance <= bounceDistanceMax then yield GainDistance(hero.id, 2)
+            yield Attack(Hero, [ Monster target.id ], weapon.power / 2)
+            if target.distance <= bounceDistanceMax then yield! gainDistance monsters 2
         ]
     }
 let attackCapture =
@@ -150,10 +152,11 @@ let attackCapture =
 let execute command =
     rState {
         let! hero = getHero
+        let! monsters = getMonsters
         match command with
-        | Advance -> return [ GainDistance(hero.id, -1) ]
-        | BackUp -> return [ GainDistance(hero.id, 1) ]
-        | Flee -> return [ Action.Flee(hero.id) ]
+        | Advance -> return gainDistance monsters -1
+        | BackUp -> return gainDistance monsters 1
+        | Flee -> return [ Action.Flee Hero ]
         | Leap -> return! attackLeap
         | Bounce -> return! attackBounce
         | Capture -> return! attackCapture

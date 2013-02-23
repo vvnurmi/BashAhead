@@ -17,53 +17,44 @@ let createMonster () =
         distance = 10
     }
 let handleAction action =
+    let attack attacker victim weapon power distance =
+        if weapon.rangeMin <= distance && distance <= weapon.rangeMax
+        then GetHit(victim, power)
+        else Miss(attacker, victim)
     rState {
         match action with
-        | Attack(actorId, [], power) ->
+        | Attack(_, [], _) ->
             return []
-        | Attack(actorId, targetIds, power) ->
-            let! actor = getCreature actorId
-            let! actorType = identify actorId
-            let! targets = adapt2 List.map getCreature targetIds
-            let w = Map.find actor.weaponName Library.weapons
-            let applyAttack t =
-                let distance = max actor.distance t.distance
-                if w.rangeMin <= distance && distance <= w.rangeMax then
-                    [ WeaponKnown actorId; GetHit(t.id, power) ]
-                else
-                    [ Miss(actorId, t.id) ]
-            let changes = List.collect applyAttack targets
+        | Attack(Hero, targetIds, power) ->
+            let! hero = getHero
+            let w = Map.find hero.weaponName Library.weapons
+            let applyAttack t = attack Hero (Monster t.id) w power t.distance
+            let! targets = adapt2 List.map getActor targetIds
+            let changes = List.map applyAttack targets
             let! aiState = getAIState
             let honor =
-                match aiState, targets.Length with
+                match aiState, targetIds.Length with
                 | AllSurrender, _ -> (Inglorious, 4)
                 | _, n when n > 1 -> (Inglorious, 1)
                 | _, _ -> (Honorable, 1)
-            match actorType with
-            | Hero -> return HeroHonor honor :: changes
-            | Monster -> return changes
+            return HeroHonor honor :: changes
+        | Attack(Monster id, [ Hero ], power) ->
+            let! actor = getCreature id
+            let w = Map.find actor.weaponName Library.weapons
+            return WeaponKnown(Monster id) :: [ attack (Monster id) Hero w power actor.distance ]
+        | Attack(_, _, _) ->
+            failwith "Not implemented"
+            return []
         | GainDistance(actorId, delta) ->
-            let! c = getCreature actorId
-            let! cType = identify actorId
-            match cType with
-            | Hero ->
-                let! monsters = getMonsters
-                return List.map (fun m -> Move(m.id, delta)) monsters
-            | Monster ->
-                return [ Move(actorId, delta) ]
+            return [ Move(actorId, delta) ]
         | Capture targetId ->
             return [ GoAway targetId; HeroHonor(Honorable, 2) ]
-        | Flee actorId ->
-            let! cType = identify actorId
-            let tryFlee ok =
-                if ok then [ Escape actorId ] else [ EscapeFail actorId ]
-            match cType with
-            | Hero ->
-                let! monsters = getMonsters
-                return tryFlee <| canFlee monsters
-            | Monster ->
-                let! m = getCreature actorId
-                return tryFlee <| canFlee [ m ]
+        | Flee Hero ->
+            let! monsters = getMonsters
+            if canFlee monsters then return [ Escape Hero ] else return [ EscapeFail Hero ]
+        | Flee(Monster id as m) ->
+            let! creature = getCreature id
+            if canFlee [ creature ] then return [ Escape m ] else return [ EscapeFail m ]
         | NextGroup ->
             let! count = getMonsterCount
             return IncMonsterCount :: List.replicate count CreateMonster
@@ -89,58 +80,53 @@ let getHitInfo = function
 let applyChange change =
     rwState {
         match change with
-        | GetHit(victimId, power) ->
-            let! victim = getCreature victimId
-            let newHitpoints = victim.hitpoints - power
-            do! setCreature victimId { victim with hitpoints = newHitpoints }
-            do! addMessage <| sprintf "%s was hit %s." victim.name (getHitInfo power)
-            return if newHitpoints <= 0<hp> then [ Die victimId ] else []
-        | Miss(actorId, targetId) ->
-            let! actor = getCreature actorId
-            let! target = getCreature targetId
+        | GetHit(victim, power) ->
+            let! c = getActor victim
+            let newHitpoints = c.hitpoints - power
+            do! setActor { c with hitpoints = newHitpoints } victim
+            do! addMessage <| sprintf "%s was hit %s." c.name (getHitInfo power)
+            return if newHitpoints <= 0<hp> then [ Die victim ] else []
+        | Miss(actor, target) ->
+            let! actor = getActor actor
+            let! target = getActor target
             do! addMessage <| sprintf "%s misses %s." actor.name target.name
             return []
-        | WeaponKnown actorId ->
-            do! updateCreature (fun actor -> { actor with weaponKnown = true }) actorId
+        | WeaponKnown actor ->
+            do! updateActor (fun actor -> { actor with weaponKnown = true }) actor
             return []
-        | Move(actorId, d) ->
-            do! updateCreature (fun actor ->
-                { actor with distance = max 0 (actor.distance + d) }) actorId
+        | Move(actor, d) ->
+            do! updateActor (fun c ->
+                { c with distance = max 0 (c.distance + d) }) <| Monster actor
             return []
-        | Escape actorId ->
-            let! cType = identify actorId
-            match cType with
-            | Hero ->
-                do! addMessage "You escape the battle!"
-                do! setGameOver
-                return []
-            | Monster ->
-                let! c = getCreature actorId
-                do! addMessage <| sprintf "%s flees!" c.name
-                do! removeMonster actorId
-                return []
-        | EscapeFail actorId ->
-            let! cType = identify actorId
-            let! m = getCreature actorId
-            match cType with
-            | Hero -> do! addMessage "You try to flee but monsters are too near."
-            | Monster -> do! addMessage <| sprintf "%s fails to escape your attention." m.name
+        | Escape Hero ->
+            do! addMessage "You escape the battle!"
+            do! setGameOver
             return []
-        | Die victimId ->
-            let! cType = identify victimId
-            match cType with
-            | Hero ->
-                do! addMessage "You draw your terminal breath!"
-                do! setGameOver
-            | Monster ->
-                let! c = getCreature victimId
-                do! addMessage <| sprintf "Life escapes %s!" c.name
-                do! removeMonster victimId
+        | Escape(Monster id) ->
+            let! c = getCreature id
+            do! addMessage <| sprintf "%s flees!" c.name
+            do! removeMonster id
             return []
-        | GoAway actorId ->
-            let! m = getCreature actorId
-            do! addMessage <| sprintf "You capture %s." m.name
-            do! removeMonster actorId
+        | EscapeFail Hero ->
+            do! addMessage "You try to flee but monsters are too near."
+            return []
+        | EscapeFail(Monster id) ->
+            let! c = getCreature id
+            do! addMessage <| sprintf "%s fails to escape your attention." c.name
+            return []
+        | Die Hero ->
+            do! addMessage "You draw your terminal breath!"
+            do! setGameOver
+            return []
+        | Die(Monster id) ->
+            let! c = getCreature id
+            do! addMessage <| sprintf "Life escapes %s!" c.name
+            do! removeMonster id
+            return []
+        | GoAway id ->
+            let! c = getCreature id
+            do! addMessage <| sprintf "You capture %s." c.name
+            do! removeMonster id
             return []
         | ChangeTactic tactic ->
             do! setAIState tactic
