@@ -146,7 +146,7 @@ let attackCapture =
         let! target = lift <| List.minBy (fun m -> m.distance) <| getMonsters
         let! aiState = getAIState
         match aiState with
-        | AllSurrender | AllFlee -> return [ Action.Capture target.id ]
+        | AllSurrender | AllFlee -> return [ Captured target.id ]
         | _ -> return []
     }
 let execute command =
@@ -156,13 +156,15 @@ let execute command =
         match command with
         | Advance -> return gainDistance monsters -1
         | BackUp -> return gainDistance monsters 1
-        | Flee -> return [ Action.Flee Hero ]
+        | Flee -> return [ Fled Hero ]
         | Leap -> return! attackLeap
         | Bounce -> return! attackBounce
         | Capture -> return! attackCapture
         | Thrust -> return! attackWeakest
         | Swing -> return! attackSweep
         | Wait -> return []
-        | NextGroup -> return [ Action.NextGroup ]
-        | Quit -> return [ Action.Quit ]
+        | NextGroup ->
+            let! count = getMonsterCount
+            return IncMonsterCount :: List.replicate count CreateMonster
+        | Quit -> return [ Event.Quit ]
     }

@@ -16,52 +16,6 @@ let createMonster () =
         weaponKnown = false
         distance = 10
     }
-let handleAction action =
-    let attack attacker victim weapon power distance =
-        if weapon.rangeMin <= distance && distance <= weapon.rangeMax
-        then GetHit(victim, power)
-        else Miss(attacker, victim)
-    rState {
-        match action with
-        | Attack(_, [], _) ->
-            return []
-        | Attack(Hero, targetIds, power) ->
-            let! hero = getHero
-            let w = Map.find hero.weaponName Library.weapons
-            let applyAttack t = attack Hero (Monster t.id) w power t.distance
-            let! targets = adapt2 List.map getActor targetIds
-            let changes = List.map applyAttack targets
-            let! aiState = getAIState
-            let honor =
-                match aiState, targetIds.Length with
-                | AllSurrender, _ -> (Inglorious, 4)
-                | _, n when n > 1 -> (Inglorious, 1)
-                | _, _ -> (Honorable, 1)
-            return HeroHonor honor :: changes
-        | Attack(Monster id, [ Hero ], power) ->
-            let! actor = getMonster id
-            let w = Map.find actor.weaponName Library.weapons
-            return WeaponKnown(Monster id) :: [ attack (Monster id) Hero w power actor.distance ]
-        | Attack(_, _, _) ->
-            failwith "Not implemented"
-            return []
-        | GainDistance(actorId, delta) ->
-            return [ Move(actorId, delta) ]
-        | Capture targetId ->
-            return [ GoAway targetId; HeroHonor(Honorable, 2) ]
-        | Flee Hero ->
-            let! monsters = getMonsters
-            if canFlee monsters then return [ Escape Hero ] else return [ EscapeFail Hero ]
-        | Flee(Monster id as m) ->
-            let! creature = getMonster id
-            if canFlee [ creature ] then return [ Escape m ] else return [ EscapeFail m ]
-        | NextGroup ->
-            let! count = getMonsterCount
-            return IncMonsterCount :: List.replicate count CreateMonster
-        | Quit ->
-            failwith "Quit"
-            return []
-    }
 
 let mapStateWithMessage get set describe value =
     rwState {
@@ -77,9 +31,48 @@ let getHitInfo = function
     | x when x >= 2<hp> -> "moderately"
     | x when x >= 1<hp> -> "lightly"
     | _ -> "negligibly"
-let applyChange change =
+let applyEvent event =
+    let attack attacker victim weapon power distance =
+        if weapon.rangeMin <= distance && distance <= weapon.rangeMax
+        then GetHit(victim, power)
+        else Miss(attacker, victim)
     rwState {
-        match change with
+        match event with
+        | Attack(_, [], _) ->
+            return []
+        | Attack(Hero, targetIds, power) ->
+            let! hero = getHero
+            let w = Map.find hero.weaponName Library.weapons
+            let applyAttack t = attack Hero (Monster t.id) w power t.distance
+            let! targets = adapt2 List.map getActor targetIds
+            let events = List.map applyAttack targets
+            let! aiState = getAIState
+            let honor =
+                match aiState, targetIds.Length with
+                | AllSurrender, _ -> (Inglorious, 4)
+                | _, n when n > 1 -> (Inglorious, 1)
+                | _, _ -> (Honorable, 1)
+            return HeroHonor honor :: events
+        | Attack(Monster id, [ Hero ], power) ->
+            let! actor = getMonster id
+            let w = Map.find actor.weaponName Library.weapons
+            return WeaponKnown(Monster id) :: [ attack (Monster id) Hero w power actor.distance ]
+        | Attack(_, _, _) ->
+            failwith "Not implemented"
+            return []
+        | GainDistance(actorId, delta) ->
+            return [ Move(actorId, delta) ]
+        | Captured targetId ->
+            return [ GoAway targetId; HeroHonor(Honorable, 2) ]
+        | Fled Hero ->
+            let! monsters = getMonsters
+            if canFlee monsters then return [ Escape Hero ] else return [ EscapeFail Hero ]
+        | Fled(Monster id as m) ->
+            let! creature = getMonster id
+            if canFlee [ creature ] then return [ Escape m ] else return [ EscapeFail m ]
+        | Quit ->
+            failwith "Quit"
+            return []
         | GetHit(victim, power) ->
             let! c = getActor victim
             let newHitpoints = c.hitpoints - power
@@ -158,21 +151,17 @@ let applyChange change =
             return []
     }
 
-let preprocessChanges =
+let preprocessEvents =
     let deaths = ref Set.empty
-    let changeFilter = function
-        | Die(_) as c ->
+    let eventFilter = function
+        | Die _ as c ->
             let skip = (!deaths).Contains c
             deaths := (!deaths).Add c
             not skip
         | _ -> true
-    List.filter changeFilter
-let rec applyChanges changes =
+    List.filter eventFilter
+let rec applyEvents events =
     rwState {
-        let! changes = adapt2 List.collect applyChange changes
-        if not changes.IsEmpty then do! changes |> preprocessChanges |> applyChanges 
-    }
-let applyActions actions =
-    rwState {
-        do! adapt2 List.iter (handleAction %>> applyChanges) actions
+        let! events = adapt2 List.collect applyEvent events
+        if not events.IsEmpty then do! events |> preprocessEvents |> applyEvents 
     }

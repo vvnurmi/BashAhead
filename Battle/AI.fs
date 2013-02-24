@@ -7,7 +7,7 @@ open Types
 open Conditions
 open State
 
-let getMonsterActions m =
+let getMonsterEvents m =
     rState {
         let! hero = getHero
         let hWeapon = Map.find hero.weaponName Library.weapons
@@ -23,17 +23,17 @@ let getMonsterActions m =
         let attack = doInRange [ Attack(Monster m.id, [ Hero ], mWeapon.power) ] mWeapon.rangeMin mWeapon.rangeMax
         match tactic with
         | AllIdle -> return []
-        | AllFlee -> return doInRange [ Flee <| Monster m.id ] fleeDistanceMin System.Int32.MaxValue
+        | AllFlee -> return doInRange [ Fled <| Monster m.id ] fleeDistanceMin System.Int32.MaxValue
         | AllSurrender -> return []
         | AllAttack -> return attack
         | OneAttack attackerId -> return if m.id = attackerId then attack else []
     }
-let getGameActions =
+let getGameEvents =
     rState {
         let! monsters = getMonsters
-        return! adapt2 List.collect getMonsterActions monsters
+        return! adapt2 List.collect getMonsterEvents monsters
     }
-let getAIChanges =
+let getAIEvents =
     rState {
         let! monsters = getMonsters
         if monsters.IsEmpty then return [ ChangeTactic AllIdle ]

@@ -11,14 +11,12 @@ type AIState =
     | AllAttack
     | AllFlee
     | AllSurrender
-type Action =
+type Event =
     | Attack of Actor * Actor list * int<hp> // attacker * victims * power
     | GainDistance of MonsterId * int
-    | Capture of MonsterId
-    | Flee of Actor
-    | NextGroup
+    | Captured of MonsterId
+    | Fled of Actor
     | Quit
-type Change =
     | GetHit of Actor * int<hp>
     | Miss of Actor * Actor // attacker * victim
     | WeaponKnown of Actor

@@ -22,7 +22,7 @@ let heroHonorSpec =
     let honorable =
         { new ICommand<State, HeroHonorModel>() with
             member x.RunActual state =
-                let op = applyChanges [ HeroHonor(Honorable, 1) ]
+                let op = applyEvents [ HeroHonor(Honorable, 1) ]
                 let _, state2 = rwState.RunOp(op, state)
                 state2
             member x.RunModel((honor, accu)) =
@@ -34,7 +34,7 @@ let heroHonorSpec =
     let inglorious =
         { new ICommand<State, HeroHonorModel>() with
             member x.RunActual state =
-                let op = applyChanges [ HeroHonor(Inglorious, 1) ]
+                let op = applyEvents [ HeroHonor(Inglorious, 1) ]
                 let _, state2 = rwState.RunOp(op, state)
                 state2
             member x.RunModel((honor, accu)) =
