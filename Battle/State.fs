@@ -4,7 +4,7 @@ open BashAhead.Common.Misc
 open BashAhead.Common.Types
 open Types
 
-type StateT = {
+type State = {
     nextId : int
     monsters : Map<MonsterId, Creature>
     hero : Creature option
@@ -15,11 +15,11 @@ type StateT = {
     aiState : AIState
     monsterCount : int
 }
-type StateOp<'a> = StateOp of (StateT -> 'a * StateT)
+type StateOp<'a> = StateOp of (State -> 'a * State)
 
 [<AbstractClass>]
 type StateBuilderBase() =
-    abstract member RunOp : StateOp<'a> * StateT -> 'a * StateT
+    abstract member RunOp : StateOp<'a> * State -> 'a * State
     member x.Lift(f, mg) =
         StateOp <| fun state ->
         let gResult, state2 = x.RunOp(mg, state)

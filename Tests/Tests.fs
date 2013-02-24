@@ -20,7 +20,7 @@ let heroHonorSpec =
         let (stateHonor, stateHonorShift), _ = rwState.RunOp(op, state)
         stateHonor = honor && shiftMatchesAccu accu stateHonorShift
     let honorable =
-        { new ICommand<StateT, HeroHonorModel>() with
+        { new ICommand<State, HeroHonorModel>() with
             member x.RunActual state =
                 let op = applyChanges [ HeroHonor(Honorable, 1) ]
                 let _, state2 = rwState.RunOp(op, state)
@@ -32,7 +32,7 @@ let heroHonorSpec =
             member x.Post(state, model) = postCondition state model
             override x.ToString() = "honorable" }
     let inglorious =
-        { new ICommand<StateT, HeroHonorModel>() with
+        { new ICommand<State, HeroHonorModel>() with
             member x.RunActual state =
                 let op = applyChanges [ HeroHonor(Inglorious, 1) ]
                 let _, state2 = rwState.RunOp(op, state)
@@ -43,7 +43,7 @@ let heroHonorSpec =
                 else Inglorious, -5
             member x.Post(state, model) = postCondition state model
             override x.ToString() = "inglorious" }
-    { new ISpecification<StateT, HeroHonorModel> with
+    { new ISpecification<State, HeroHonorModel> with
         member x.Initial() = stateUnit, (Honorable, 1)
         member x.GenCommand _ = Gen.elements [ honorable; inglorious ] }
 let ``hero honor changes`` = asProperty heroHonorSpec
