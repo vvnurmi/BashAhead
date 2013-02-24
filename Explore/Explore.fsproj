@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>1e894f85-c1a7-4c6a-b808-be64eb8c9f6d</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>BashAhead</RootNamespace>
-    <AssemblyName>BashAhead</AssemblyName>
+    <ProjectGuid>19e702c6-7ffc-4cd5-aa8b-a216725ffd2d</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Explore</RootNamespace>
+    <AssemblyName>Explore</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>BashAhead</Name>
+    <Name>Explore</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -18,12 +18,9 @@
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>
-    </DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Debug\Explore.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,9 +29,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\BashAhead.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Release\Explore.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -44,28 +39,18 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BashAhead.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Battle\Battle.fsproj">
-      <Name>Battle</Name>
-      <Project>{757e5f37-ced3-43f6-8acb-d7ec82b0dad4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{90a3b265-79a3-46a1-a6d3-8bc2cb27fbd5}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Explore\Explore.fsproj">
-      <Name>Explore</Name>
-      <Project>{19e702c6-7ffc-4cd5-aa8b-a216725ffd2d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Update.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="State.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
