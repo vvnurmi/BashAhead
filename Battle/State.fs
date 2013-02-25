@@ -5,7 +5,7 @@ open BashAhead.Common.Types
 open Types
 
 type State = {
-    nextId : int
+    nextId : MonsterId
     monsters : Map<MonsterId, Creature>
     hero : Creature option
     heroHonor : Honor
