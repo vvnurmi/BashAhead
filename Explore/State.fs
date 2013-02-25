@@ -1,12 +1,19 @@
 ﻿module BashAhead.Explore.State
 
-type LocationId = int
+open Types
 
 type Location = {
     name : string
 }
 
 type State = {
+    nextId : LocationId
     locations : Map<LocationId, Location>
-    heroLocation : LocationId
+    heroLocation : LocationId option
+}
+
+let stateUnit = {
+    nextId = 0
+    locations = Map.empty
+    heroLocation = None
 }
