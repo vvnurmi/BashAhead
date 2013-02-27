@@ -2,6 +2,7 @@
 
 open BashAhead.Common.ConsoleIO
 open BashAhead.Common.Misc
+open BashAhead.Common.State
 open AI
 open Commands
 open State

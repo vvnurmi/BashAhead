@@ -6,6 +6,7 @@
 do ()
 
 open BashAhead.Common.Types
+open BashAhead.Common.State
 open BashAhead.Battle.State
 open BashAhead.Battle.ConsoleIO
 

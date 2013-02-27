@@ -4,6 +4,7 @@ open FsCheck
 open FsCheck.Commands
 open FsCheck.Prop
 open BashAhead.Common.Types
+open BashAhead.Common.State
 open BashAhead.Battle.Types
 open BashAhead.Battle.State
 open BashAhead.Battle.Conditions

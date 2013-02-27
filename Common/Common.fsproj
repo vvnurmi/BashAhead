@@ -46,6 +46,7 @@
     <Compile Include="Library.fs" />
     <Compile Include="Conditions.fs" />
     <Compile Include="ConsoleIO.fs" />
+    <Compile Include="State.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
