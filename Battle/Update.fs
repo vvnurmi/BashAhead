@@ -16,6 +16,7 @@ let createMonster () =
         weaponKnown = false
         distance = 10
     }
+let addMessage s = liftCommon <| BashAhead.Common.State.addMessage s
 
 let mapStateWithMessage get set describe value =
     rwState {
@@ -41,7 +42,7 @@ let applyEvent event =
         | Attack(_, [], _) ->
             return []
         | Attack(Hero, targetIds, power) ->
-            let! hero = getHero
+            let! hero = liftCommon getHero
             let w = Map.find hero.weaponName Library.weapons
             let applyAttack t = attack Hero (Monster t.id) w power t.distance
             let! targets = adapt2 List.map getActor targetIds
@@ -93,7 +94,7 @@ let applyEvent event =
             return []
         | Escape Hero ->
             do! addMessage "You escape the battle!"
-            do! setGameOver
+            do! liftCommon setGameOver
             return []
         | Escape(Monster id) ->
             let! c = getMonster id
@@ -109,7 +110,7 @@ let applyEvent event =
             return []
         | Die Hero ->
             do! addMessage "You draw your terminal breath!"
-            do! setGameOver
+            do! liftCommon setGameOver
             return []
         | Die(Monster id) ->
             let! c = getMonster id

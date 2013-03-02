@@ -28,7 +28,8 @@ let rec uiLoop () =
     }
 let main =
     rwState {
-        do! setHero <| createHero ()
+        let hero = createHero ()
+        do! liftCommon <| setHero hero
         do! uiLoop ()
     }
 let _, finalState = rwState.RunOp(main, stateUnit)

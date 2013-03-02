@@ -27,10 +27,10 @@ let formatAIState =
     }
 let showState =
     rState {
-        let! heroRow = lift formatCreature getHero
+        let! heroRow = lift formatCreature (liftCommon getHero)
         let! monsterRows = lift (List.map formatCreature) getMonsters
         let! aiStateRow = formatAIState
-        let! messageRows = lift formatMessages getMessages
+        let! messageRows = lift formatMessages (liftCommon getMessages)
         printStatus <| Table(heroRow :: monsterRows)
         printAIState <| Str aiStateRow
         printMessages <| Table messageRows
@@ -47,19 +47,13 @@ let rec getUserEvents () =
         | Some c -> return! execute c
         | None -> return! getUserEvents ()
     }
-let checkGameOver =
-    rState {
-        let! gameOver = getGameOver
-        if gameOver then Str "Game over." |> getCommand |> ignore
-        return not gameOver
-    }
 // Returns false if quit was requested
 let processUI () =
     rwState {
         clear ()
         do! showState
-        do! clearMessages
-        let! ok = checkGameOver
+        do! liftCommon clearMessages
+        let! ok = liftCommon checkGameOver
         if ok then
             let! userEvents = getUserEvents ()
             if not <| List.exists ((=) Quit) userEvents then

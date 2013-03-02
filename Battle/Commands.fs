@@ -3,6 +3,7 @@
 open BashAhead.Common
 open BashAhead.Common.ConsoleIO
 open BashAhead.Common.Types
+open BashAhead.Common.State
 open Types
 open State
 open Conditions
@@ -77,7 +78,7 @@ let explainPrecondition command =
 let testPrecondition c =
     rState {
         let! monsters = getMonsters
-        let! hero = getHero
+        let! hero = liftCommon getHero
         let! aiState = getAIState
         match c with
         | Advance -> return not monsters.IsEmpty && List.forall (fun m -> m.distance > 1) monsters
@@ -103,7 +104,7 @@ let gainDistance monsters distance =
 
 let attackWeakest =
     rState {
-        let! hero = getHero
+        let! hero = liftCommon getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let monstersInRange = List.filter (isInRange hero.weaponName) monsters
@@ -114,7 +115,7 @@ let attackWeakest =
     }
 let attackSweep =
     rState {
-        let! hero = getHero
+        let! hero = liftCommon getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let targets = monsters |> List.filter (isInRange hero.weaponName) |> Seq.truncate 4 |> Seq.toList
@@ -122,7 +123,7 @@ let attackSweep =
     }
 let attackLeap =
     rState {
-        let! hero = getHero
+        let! hero = liftCommon getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let target = List.minBy (fun m -> m.distance) monsters
@@ -132,7 +133,7 @@ let attackLeap =
     }
 let attackBounce =
     rState {
-        let! hero = getHero
+        let! hero = liftCommon getHero
         let weapon = Map.find hero.weaponName Library.weapons
         let! monsters = getMonsters
         let target = List.minBy (fun m -> m.distance) monsters
@@ -151,7 +152,7 @@ let attackCapture =
     }
 let execute command =
     rState {
-        let! hero = getHero
+        let! hero = liftCommon getHero
         let! monsters = getMonsters
         match command with
         | Advance -> return gainDistance monsters -1

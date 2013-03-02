@@ -9,7 +9,7 @@ open State
 
 let getMonsterEvents m =
     rState {
-        let! hero = getHero
+        let! hero = liftCommon getHero
         let hWeapon = Map.find hero.weaponName Library.weapons
         let mWeapon = Map.find m.weaponName Library.weapons
         let doInRange x min max =

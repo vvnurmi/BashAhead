@@ -1,5 +1,8 @@
 ﻿module BashAhead.Common.State
 
+open Misc
+open Types
+
 type StateOp<'s, 'a when 's : equality> =
     StateOp of ('s -> 'a * 's)
 
@@ -70,3 +73,39 @@ let getState f =
 let mapState f =
     StateOp <| fun state ->
     (), f state
+
+type State = {
+    hero : Creature option
+    messages : string list
+    gameOver : bool
+}
+
+let stateUnit = {
+    hero = None
+    messages = []
+    gameOver = false
+}
+
+let getHero =
+    rState {
+        let! hero = getState <| fun state -> state.hero
+        match hero with
+        | Some h -> return h
+        | _ -> return failwith "Hero not defined"
+    }
+let setHero h =
+    rwState {
+        do! mapState <| fun state -> { state with hero = Some h }
+    }
+
+let getMessages =
+    getState <| fun state -> state.messages
+let addMessage m =
+    mapState <| fun state -> { state with messages = capitalize m :: state.messages }
+let clearMessages =
+    mapState <| fun state -> { state with messages = [] }
+
+let getGameOver =
+    getState <| fun state -> state.gameOver
+let setGameOver =
+    mapState <| fun state -> { state with gameOver = true }

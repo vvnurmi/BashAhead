@@ -14,7 +14,7 @@ let canFlee monsters =
 
 let leapDistanceMin =
     rState {
-        let! hero = getHero
+        let! hero = liftCommon getHero
         let weapon = Map.find hero.weaponName Library.weapons
         return weapon.rangeMax + 1
     }

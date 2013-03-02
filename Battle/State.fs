@@ -1,33 +1,33 @@
 ﻿module BashAhead.Battle.State
 
-open BashAhead.Common.Misc
 open BashAhead.Common.Types
 open BashAhead.Common.State
 open Types
 
 type State = {
+    common : BashAhead.Common.State.State
     nextId : MonsterId
     monsters : Map<MonsterId, Creature>
-    hero : Creature option
     heroHonor : Honor
     heroHonorShift : Honor * int // tendency * amplitude
-    gameOver : bool
-    messages : string list
     aiState : AIState
     monsterCount : int
 }
 
 let stateUnit = {
+    common = BashAhead.Common.State.stateUnit
     nextId = 0
     monsters = Map.empty
-    hero = None
     heroHonor = Honorable
     heroHonorShift = Honorable, 1
-    gameOver = false
-    messages = []
     aiState = AllIdle
     monsterCount = 1
 }
+
+let liftCommon f =
+    StateOp <| fun state ->
+    let a, commonState2 = rwState.RunOp(f, state.common)
+    a, { state with common = commonState2 }
 
 let getNewId =
     StateOp <| fun state ->
@@ -48,24 +48,12 @@ let setMonster id c =
 let removeMonster id =
     mapState <| fun state -> { state with monsters = Map.remove id state.monsters }
 
-let getHero =
-    rState {
-        let! hero = getState <| fun state -> state.hero
-        match hero with
-        | Some h -> return h
-        | _ -> return failwith "Hero not defined"
-    }
-let setHero h =
-    rwState {
-        do! mapState <| fun state -> { state with hero = Some h }
-    }
-
 let getActor = function
     | Monster c -> getMonster c
-    | Hero -> getHero
+    | Hero -> liftCommon getHero
 let setActor c = function
     | Monster id -> setMonster id c
-    | Hero -> setHero c
+    | Hero -> liftCommon <| setHero c
 let updateActor f actor =
     rwState {
         let! c = getActor actor
@@ -85,16 +73,6 @@ let getMonsters =
         let! monsters = getState <| fun state -> state.monsters
         return List.map snd <| Map.toList monsters
     }
-let getGameOver =
-    getState <| fun state -> state.gameOver
-let setGameOver =
-    mapState <| fun state -> { state with gameOver = true }
-let getMessages =
-    getState <| fun state -> state.messages
-let addMessage m =
-    mapState <| fun state -> { state with messages = capitalize m :: state.messages }
-let clearMessages =
-    mapState <| fun state -> { state with messages = [] }
 let getAIState =
     getState <| fun state -> state.aiState
 let setAIState s =

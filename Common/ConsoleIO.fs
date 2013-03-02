@@ -3,6 +3,7 @@
 open System
 open Misc
 open Types
+open State
 open Conditions
 
 type Color = ConsoleColor
@@ -64,6 +65,12 @@ let getCommand promptFmt =
     let width, height = getSize promptFmt
     print { c with x = c.x + width + 1; y = c.y + height - 1 } <| Str ""
     Console.ReadLine()
+let checkGameOver =
+    rState {
+        let! gameOver = getGameOver
+        if gameOver then Str "Game over." |> getCommand |> ignore
+        return not gameOver
+    }
 
 let formatCreature c =
     let nameElem = Str <| (String.replicate c.distance " ") + c.name
