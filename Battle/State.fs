@@ -28,12 +28,6 @@ let stateUnit = {
     aiState = AllIdle
     monsterCount = 1
 }
-let getState f =
-    StateOp <| fun state ->
-    f state, state
-let mapState f =
-    StateOp <| fun state ->
-    (), f state
 
 let getNewId =
     StateOp <| fun state ->

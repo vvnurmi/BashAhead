@@ -63,3 +63,10 @@ type RStateBuilder() =
 #endif
         rf, state
 let rState = RStateBuilder()
+
+let getState f =
+    StateOp <| fun state ->
+    f state, state
+let mapState f =
+    StateOp <| fun state ->
+    (), f state
