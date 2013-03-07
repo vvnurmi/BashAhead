@@ -7,6 +7,7 @@ do ()
 
 open BashAhead.Common.Types
 open BashAhead.Common.State
+open BashAhead.Common.ConsoleIO
 open BashAhead.Battle.State
 open BashAhead.Battle.ConsoleIO
 
@@ -21,15 +22,20 @@ let createHero () =
         distance = 0
     }
 
-let rec uiLoop () =
+let rec uiLoop showState processUI =
     rwState {
-        let! proceed = processUI ()
-        if proceed then do! uiLoop ()
+        clear ()
+        do! showState
+        do! liftCommon clearMessages
+        let! proceed = liftCommon checkGameOver
+        if proceed then
+            do! processUI ()
+            do! uiLoop showState processUI
     }
 let main =
     rwState {
         let hero = createHero ()
         do! liftCommon <| setHero hero
-        do! uiLoop ()
+        do! uiLoop BashAhead.Battle.ConsoleIO.showState BashAhead.Battle.ConsoleIO.processUI
     }
 let _, finalState = rwState.RunOp(main, stateUnit)

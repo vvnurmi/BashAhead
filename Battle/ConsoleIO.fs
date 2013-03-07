@@ -38,14 +38,8 @@ let showState =
 // Returns false if quit was requested
 let processUI () =
     rwState {
-        clear ()
-        do! showState
-        do! liftCommon clearMessages
-        let! ok = liftCommon checkGameOver
-        if ok then
-            let! userEvents = getUserEvents getCommands getName testPrecondition formatCommand execute
-            do! applyEvents userEvents
-            do! getAIEvents %|> applyEvents
-            do! getGameEvents %|> applyEvents
-        return ok
+        let! userEvents = getUserEvents getCommands getName testPrecondition formatCommand execute
+        do! applyEvents userEvents
+        do! getAIEvents %|> applyEvents
+        do! getGameEvents %|> applyEvents
     }
