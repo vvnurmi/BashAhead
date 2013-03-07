@@ -6,7 +6,6 @@ open Types
 
 type State = {
     common : BashAhead.Common.State.State
-    nextId : MonsterId
     monsters : Map<MonsterId, Creature>
     heroHonor : Honor
     heroHonorShift : Honor * int // tendency * amplitude
@@ -16,7 +15,6 @@ type State = {
 
 let stateUnit = {
     common = BashAhead.Common.State.stateUnit
-    nextId = 0
     monsters = Map.empty
     heroHonor = Honorable
     heroHonorShift = Honorable, 1
@@ -29,15 +27,12 @@ let liftCommon f =
     let a, commonState2 = rwState.RunOp(f, state.common)
     a, { state with common = commonState2 }
 
-let getNewId =
-    StateOp <| fun state ->
-    state.nextId, { state with nextId = state.nextId + 1 }
 let isDead c =
     c.hitpoints <= 0<hp>
 
 let addMonster c =
     rwState {
-        let! id = getNewId
+        let! id = liftCommon getNewId
         let c = { c with id = id }
         do! mapState <| fun state -> { state with monsters = Map.add id c state.monsters }
     }

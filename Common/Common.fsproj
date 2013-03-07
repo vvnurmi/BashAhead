@@ -44,8 +44,10 @@
     <Compile Include="Misc.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="State.fs" />
+    <Compile Include="Commands.fs" />
     <Compile Include="Library.fs" />
     <Compile Include="Conditions.fs" />
+    <Compile Include="Update.fs" />
     <Compile Include="ConsoleIO.fs" />
   </ItemGroup>
   <PropertyGroup>

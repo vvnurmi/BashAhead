@@ -1,6 +1,7 @@
 ﻿module BashAhead.Battle.Commands
 
 open BashAhead.Common
+open BashAhead.Common.Commands
 open BashAhead.Common.ConsoleIO
 open BashAhead.Common.Types
 open BashAhead.Common.State
@@ -17,9 +18,8 @@ type Command =
     | Bounce
     | Capture
     | Flee
-    | Wait
     | NextGroup
-    | Quit
+    | Common of BashAhead.Common.Commands.Command
 
 let monsterCommands = 
     [
@@ -36,20 +36,15 @@ let idleCommands =
     [
         NextGroup
     ]
-let systemCommands =
-    [
-        Wait
-        Quit
-    ]
 let getCommands =
     rState {
         let! monsters = getMonsters
         return [
             if monsters.IsEmpty then yield! idleCommands else yield! monsterCommands
-            yield! systemCommands
+            yield! List.map (fun c -> Common c) commonCommands
         ]
     }
-let getName = function
+let getNameRaw = function
     | Advance -> "Advance"
     | BackUp -> "Back up"
     | Thrust -> "Thrust"
@@ -58,9 +53,12 @@ let getName = function
     | Bounce -> "Bounce off"
     | Capture -> "Capture"
     | Flee -> "Flee"
-    | Wait -> "Wait"
     | NextGroup -> "Find more enemies"
-    | Quit -> "Quit"
+    | Common c -> BashAhead.Common.Commands.getName c
+let getName command =
+    rState {
+        return getNameRaw command
+    }
 let explainPrecondition command =
     rState {
         match command with
@@ -93,10 +91,10 @@ let testPrecondition c =
 let formatCommand c active =
     rState {
         if active then
-            return Row [ StrColor(getName c, Color.White); Str "" ]
+            return Row [ StrColor(getNameRaw c, Color.White); Str "" ]
         else
             let! explanation = explainPrecondition c
-            return Row [ StrColor(getName c, Color.DarkGray); StrColor(explanation, Color.DarkGray) ]
+            return Row [ StrColor(getNameRaw c, Color.DarkGray); StrColor(explanation, Color.DarkGray) ]
     }
 
 let gainDistance monsters distance =
@@ -163,9 +161,10 @@ let execute command =
         | Capture -> return! attackCapture
         | Thrust -> return! attackWeakest
         | Swing -> return! attackSweep
-        | Wait -> return []
         | NextGroup ->
             let! count = getMonsterCount
             return IncMonsterCount :: List.replicate count CreateMonster
-        | Quit -> return [ Event.Quit ]
+        | Common c ->
+            let commonEvents = BashAhead.Common.Commands.execute c
+            return List.map (fun e -> Event.Common e) commonEvents
     }

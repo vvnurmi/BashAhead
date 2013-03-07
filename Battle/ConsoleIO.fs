@@ -35,18 +35,6 @@ let showState =
         printAIState <| Str aiStateRow
         printMessages <| Table messageRows
     }
-let rec getUserEvents () =
-    rState {
-        // getCommands testPrecondition formatCommand execute
-        let! commands = getCommands
-        let! commandOks = adapt2 List.map testPrecondition commands
-        let! promptFmt = adapt3 List.map2 formatCommand commands commandOks
-        let command = getCommand <| Table promptFmt
-        let! okCommands = adapt2 List.filter testPrecondition commands
-        match tryFindStart command <| List.map (fun c -> getName c, c) okCommands with
-        | Some c -> return! execute c
-        | None -> return! getUserEvents ()
-    }
 // Returns false if quit was requested
 let processUI () =
     rwState {
@@ -55,12 +43,9 @@ let processUI () =
         do! liftCommon clearMessages
         let! ok = liftCommon checkGameOver
         if ok then
-            let! userEvents = getUserEvents ()
-            if not <| List.exists ((=) Quit) userEvents then
-                do! applyEvents userEvents
-                do! getAIEvents %|> applyEvents
-                do! getGameEvents %|> applyEvents
-                return true
-            else return false
-        else return false
+            let! userEvents = getUserEvents getCommands getName testPrecondition formatCommand execute
+            do! applyEvents userEvents
+            do! getAIEvents %|> applyEvents
+            do! getGameEvents %|> applyEvents
+        return ok
     }

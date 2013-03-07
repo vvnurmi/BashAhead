@@ -75,17 +75,22 @@ let mapState f =
     (), f state
 
 type State = {
+    nextId : int
     hero : Creature option
     messages : string list
     gameOver : bool
 }
 
 let stateUnit = {
+    nextId = 0
     hero = None
     messages = []
     gameOver = false
 }
 
+let getNewId =
+    StateOp <| fun state ->
+    state.nextId, { state with nextId = state.nextId + 1 }
 let getHero =
     rState {
         let! hero = getState <| fun state -> state.hero

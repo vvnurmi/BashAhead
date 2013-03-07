@@ -71,6 +71,18 @@ let checkGameOver =
         if gameOver then Str "Game over." |> getCommand |> ignore
         return not gameOver
     }
+let rec getUserEvents getCommands getName testPrecondition formatCommand execute =
+    rState {
+        let! commands = getCommands
+        let! commandOks = adapt2 List.map testPrecondition commands
+        let! promptFmt = adapt3 List.map2 formatCommand commands commandOks
+        let command = getCommand <| Table promptFmt
+        let! okCommands = adapt2 List.filter testPrecondition commands
+        let! names = adapt2 List.map getName okCommands
+        match tryFindStart command <| List.zip names okCommands with
+        | Some c -> return! execute c
+        | None -> return! getUserEvents getCommands getName testPrecondition formatCommand execute
+    }
 
 let formatCreature c =
     let nameElem = Str <| (String.replicate c.distance " ") + c.name

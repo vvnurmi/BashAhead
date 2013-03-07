@@ -71,9 +71,6 @@ let applyEvent event =
         | Fled(Monster id as m) ->
             let! creature = getMonster id
             if canFlee [ creature ] then return [ Escape m ] else return [ EscapeFail m ]
-        | Quit ->
-            failwith "Quit"
-            return []
         | GetHit(victim, power) ->
             let! c = getActor victim
             let newHitpoints = c.hitpoints - power
@@ -149,6 +146,9 @@ let applyEvent event =
             return []
         | CreateMonster ->
             do! addMonster <| createMonster ()
+            return []
+        | Common e ->
+            do! liftCommon <| BashAhead.Common.Update.applyEvent e
             return []
     }
 

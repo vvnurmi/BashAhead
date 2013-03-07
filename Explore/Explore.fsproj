@@ -48,9 +48,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Update.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="State.fs" />
+    <Compile Include="Update.fs" />
+    <Compile Include="Commands.fs" />
+    <Compile Include="ConsoleIO.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

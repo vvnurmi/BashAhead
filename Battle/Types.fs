@@ -16,7 +16,6 @@ type Event =
     | GainDistance of MonsterId * int
     | Captured of MonsterId
     | Fled of Actor
-    | Quit
     | GetHit of Actor * int<hp>
     | Miss of Actor * Actor // attacker * victim
     | WeaponKnown of Actor
@@ -29,3 +28,4 @@ type Event =
     | HeroHonor of Honor * int // type * amplitude
     | IncMonsterCount
     | CreateMonster
+    | Common of BashAhead.Common.Types.Event

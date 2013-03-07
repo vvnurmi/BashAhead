@@ -21,3 +21,5 @@ type Creature = {
 type Honor =
     | Honorable
     | Inglorious
+type Event =
+    | Quit
