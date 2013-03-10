@@ -8,14 +8,25 @@ open Types
 open Update
 
 let printStatus = print { x = 0; y = 0; color = Color.Gray }
-let printAIState = print { x = 0; y = 9; color = Color.White }
+let printLocation = print { x = 0; y = 9; color = Color.White }
 let printMessages = print { x = 0; y = 10; color = Color.Gray }
 
+let formatLocation =
+    rState {
+        let! location = getHeroLocation
+        let locStr =
+            match location with
+            | Some loc -> sprintf "You are at the %s." loc.name
+            | None -> "You are in a limbo!"
+        return Row <| [ StrColor(locStr, Color.White) ]
+    }
 let showState =
     rState {
         let! heroRow = liftCommon <| lift formatCreature getHero
+        let! locationRow = formatLocation
         let! messageRows = liftCommon <| lift formatMessages getMessages
         printStatus <| Table [ heroRow ]
+        printLocation <| Table [ locationRow ]
         printMessages <| Table messageRows
     }
 

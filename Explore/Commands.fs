@@ -21,9 +21,8 @@ let getName command =
         match command with
         | Move id ->
             let! location = getLocation id
-            return sprintf "Move to %s" location.name
-        | Common c ->
-            return BashAhead.Common.Commands.getName c
+            return sprintf "Go to the %s" location.name
+        | Common c -> return BashAhead.Common.Commands.getName c
     }
 let testPrecondition command =
     rState {
