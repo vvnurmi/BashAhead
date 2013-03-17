@@ -10,6 +10,7 @@ type State = {
     heroHonor : Honor
     heroHonorShift : Honor * int // tendency * amplitude
     aiState : AIState
+    battleOver : bool
 }
 
 let stateUnit = {
@@ -18,6 +19,7 @@ let stateUnit = {
     heroHonor = Honorable
     heroHonorShift = Honorable, 1
     aiState = AllIdle
+    battleOver = false
 }
 
 let liftCommon f =
@@ -57,16 +59,24 @@ let getHeroHonor =
     getState <| fun state -> state.heroHonor
 let setHeroHonor h =
     mapState <| fun state -> { state with heroHonor = h }
+
 let getHeroHonorShift =
     getState <| fun state -> state.heroHonorShift
 let setHeroHonorShift hs =
     mapState <| fun state -> { state with heroHonorShift = hs }
+
 let getMonsters =
     rState {
         let! monsters = getState <| fun state -> state.monsters
         return List.map snd <| Map.toList monsters
     }
+
 let getAIState =
     getState <| fun state -> state.aiState
 let setAIState s =
     mapState <| fun state -> { state with aiState = s }
+
+let getBattleOver =
+    getState <| fun state -> state.battleOver
+let setBattleOver =
+    mapState <| fun state -> { state with battleOver = true }

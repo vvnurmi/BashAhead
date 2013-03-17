@@ -27,6 +27,12 @@ let applyEvent event =
         if weapon.rangeMin <= distance && distance <= weapon.rangeMax
         then GetHit(victim, power)
         else Miss(attacker, victim)
+    let removeMonster id =
+        rwState {
+            do! removeMonster id
+            let! monsters = getMonsters
+            if monsters.IsEmpty then do! setBattleOver
+        }
     rwState {
         match event with
         | Attack(_, [], _) ->
@@ -81,7 +87,7 @@ let applyEvent event =
             return []
         | Escape Hero ->
             do! addMessage "You escape the battle!"
-            do! liftCommon setGameOver
+            do! setBattleOver
             return []
         | Escape(Monster id) ->
             let! c = getMonster id
