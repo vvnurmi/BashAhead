@@ -27,12 +27,6 @@ let applyEvent event =
         if weapon.rangeMin <= distance && distance <= weapon.rangeMax
         then GetHit(victim, power)
         else Miss(attacker, victim)
-    let removeMonster id =
-        rwState {
-            do! removeMonster id
-            let! monsters = getMonsters
-            if monsters.IsEmpty then do! setBattleOver
-        }
     let getHeroHonor = liftCommon getHeroHonor
     let setHeroHonor h = liftCommon <| setHeroHonor h
     rwState {
@@ -142,6 +136,12 @@ let applyEvent event =
             do! liftCommon <| BashAhead.Common.Update.applyEvent e
             return []
     }
+let checkState =
+    rwState {
+        let! gameOver = liftCommon getGameOver
+        let! monsters = getMonsters
+        if gameOver || monsters.IsEmpty then do! setBattleOver
+    }
 
 let preprocessEvents =
     let deaths = ref Set.empty
@@ -156,4 +156,5 @@ let rec applyEvents events =
     rwState {
         let! events = adapt2 List.collect applyEvent events
         if not events.IsEmpty then do! events |> preprocessEvents |> applyEvents 
+        do! checkState
     }
