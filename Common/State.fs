@@ -77,6 +77,7 @@ let mapState f =
 type State = {
     nextId : int
     hero : Creature option
+    heroHonor : Honor
     messages : string list
     gameOver : bool
 }
@@ -84,6 +85,7 @@ type State = {
 let stateUnit = {
     nextId = 1
     hero = None
+    heroHonor = Honorable
     messages = []
     gameOver = false
 }
@@ -102,6 +104,11 @@ let setHero h =
     rwState {
         do! mapState <| fun state -> { state with hero = Some h }
     }
+
+let getHeroHonor =
+    getState <| fun state -> state.heroHonor
+let setHeroHonor h =
+    mapState <| fun state -> { state with heroHonor = h }
 
 let getMessages =
     getState <| fun state -> state.messages

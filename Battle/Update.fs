@@ -33,6 +33,8 @@ let applyEvent event =
             let! monsters = getMonsters
             if monsters.IsEmpty then do! setBattleOver
         }
+    let getHeroHonor = liftCommon getHeroHonor
+    let setHeroHonor h = liftCommon <| setHeroHonor h
     rwState {
         match event with
         | Attack(_, [], _) ->

@@ -40,7 +40,7 @@ let getAIEvents =
         else
             let criticals = List.filter (fun m -> health m.maxHitpoints m.hitpoints <= Critical) monsters
             let panic = criticals.Length > monsters.Length / 2
-            let! heroHonor = getHeroHonor
+            let! heroHonor = liftCommon getHeroHonor
             let tactic =
                 match heroHonor, panic with
                 | Honorable, false -> OneAttack monsters.[0].id

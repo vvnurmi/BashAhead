@@ -7,7 +7,6 @@ open Types
 type State = {
     common : BashAhead.Common.State.State
     monsters : Map<MonsterId, Creature>
-    heroHonor : Honor
     heroHonorShift : Honor * int // tendency * amplitude
     aiState : AIState
     battleOver : bool
@@ -16,7 +15,6 @@ type State = {
 let stateUnit = {
     common = BashAhead.Common.State.stateUnit
     monsters = Map.empty
-    heroHonor = Honorable
     heroHonorShift = Honorable, 1
     aiState = AllIdle
     battleOver = false
@@ -54,11 +52,6 @@ let updateActor f actor =
         let! c = getActor actor
         do! setActor (f c) actor
     }
-
-let getHeroHonor =
-    getState <| fun state -> state.heroHonor
-let setHeroHonor h =
-    mapState <| fun state -> { state with heroHonor = h }
 
 let getHeroHonorShift =
     getState <| fun state -> state.heroHonorShift
