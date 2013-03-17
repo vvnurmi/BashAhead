@@ -82,7 +82,7 @@ type State = {
 }
 
 let stateUnit = {
-    nextId = 0
+    nextId = 1
     hero = None
     messages = []
     gameOver = false
