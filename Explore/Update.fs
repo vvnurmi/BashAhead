@@ -16,7 +16,7 @@ let createMonster () =
         weaponKnown = false
         distance = 10
     }
-let doBattle =
+let doBattle () =
     rwState {
         let monsterCount = random.Next(1, 5)
         let monsters = List.init monsterCount <| fun _ -> createMonster ()
@@ -28,7 +28,7 @@ let applyEvent event =
         match event with
         | ToBattle ->
             let! battleState = extractBattleState
-            let _, battleState2 = rwState.RunOp(doBattle, battleState)
+            let _, battleState2 = rwState.RunOp(doBattle (), battleState)
             do! absorbBattleState battleState2
         | HeroMoves id -> do! setHeroLocation id
         | Common e -> do! liftCommon <| BashAhead.Common.Update.applyEvent e
