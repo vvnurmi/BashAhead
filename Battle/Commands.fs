@@ -18,7 +18,6 @@ type Command =
     | Bounce
     | Capture
     | Flee
-    | NextGroup
     | Common of BashAhead.Common.Commands.Command
 
 let monsterCommands = 
@@ -32,15 +31,11 @@ let monsterCommands =
         Bounce
         Capture
     ]
-let idleCommands =
-    [
-        NextGroup
-    ]
 let getCommands =
     rState {
         let! monsters = getMonsters
         return [
-            if monsters.IsEmpty then yield! idleCommands else yield! monsterCommands
+            yield! monsterCommands
             yield! List.map (fun c -> Common c) commonCommands
         ]
     }
@@ -53,7 +48,6 @@ let getNameRaw = function
     | Bounce -> "Bounce off"
     | Capture -> "Capture"
     | Flee -> "Flee"
-    | NextGroup -> "Find more enemies"
     | Common c -> BashAhead.Common.Commands.getName c
 let getName command =
     rState {
@@ -161,9 +155,6 @@ let execute command =
         | Capture -> return! attackCapture
         | Thrust -> return! attackWeakest
         | Swing -> return! attackSweep
-        | NextGroup ->
-            let! count = getMonsterCount
-            return IncMonsterCount :: List.replicate count CreateMonster
         | Common c ->
             let commonEvents = BashAhead.Common.Commands.execute c
             return List.map (fun e -> Event.Common e) commonEvents

@@ -6,16 +6,6 @@ open Types
 open State
 open Conditions
 
-let createMonster () =
-    {
-        id = 0
-        name = chooseOne [ "orc"; "goblin"; "wolf" ]
-        maxHitpoints = 12<hp>
-        hitpoints = 12<hp>
-        weaponName = chooseOne <| List.map fst (Map.toList Library.weapons)
-        weaponKnown = false
-        distance = 10
-    }
 let addMessage s = liftCommon <| BashAhead.Common.State.addMessage s
 
 let mapStateWithMessage get set describe value =
@@ -139,13 +129,6 @@ let applyEvent event =
                 | x, n -> oldHonor, (x, n - amplitude)
             do! mapStateWithMessage getHeroHonor setHeroHonor describe newHonor
             do! setHeroHonorShift newHonorShift
-            return []
-        | IncMonsterCount ->
-            let! count = getMonsterCount
-            do! setMonsterCount <| count + 1
-            return []
-        | CreateMonster ->
-            do! addMonster <| createMonster ()
             return []
         | Common e ->
             do! liftCommon <| BashAhead.Common.Update.applyEvent e

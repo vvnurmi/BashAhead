@@ -51,3 +51,10 @@ let getHeroLocation =
 let setHeroLocation id =
     mapState <| fun state ->
     { state with heroLocation = Some id }
+
+let extractBattleState =
+    getState <| fun state ->
+    { BashAhead.Battle.State.stateUnit with common = state.common }
+let absorbBattleState (battleState : BashAhead.Battle.State.State) =
+    mapState <| fun state ->
+    { state with common = battleState.common }

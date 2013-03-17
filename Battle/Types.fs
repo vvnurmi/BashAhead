@@ -26,6 +26,4 @@ type Event =
     | GoAway of MonsterId
     | ChangeTactic of AIState
     | HeroHonor of Honor * int // type * amplitude
-    | IncMonsterCount
-    | CreateMonster
     | Common of BashAhead.Common.Types.Event

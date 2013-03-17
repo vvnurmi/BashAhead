@@ -29,10 +29,18 @@ let showState =
         printLocation <| Table [ locationRow ]
         printMessages <| Table messageRows
     }
-
-// Returns false if quit was requested
 let processUI () =
     rwState {
         let! userEvents = getUserEvents getCommands getName testPrecondition formatCommand execute
         do! adapt2 List.iter applyEvent userEvents
+    }
+let rec uiLoop () =
+    rwState {
+        clear ()
+        do! showState
+        do! liftCommon clearMessages
+        let! proceed = liftCommon checkGameOver
+        if proceed then
+            do! processUI ()
+            do! uiLoop ()
     }

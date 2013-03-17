@@ -35,11 +35,25 @@ let showState =
         printAIState <| Str aiStateRow
         printMessages <| Table messageRows
     }
-// Returns false if quit was requested
+let checkBattleOver =
+    rState {
+        let! monsters = getMonsters
+        return monsters.IsEmpty
+    }
 let processUI () =
     rwState {
         let! userEvents = getUserEvents getCommands getName testPrecondition formatCommand execute
         do! applyEvents userEvents
         do! getAIEvents %|> applyEvents
         do! getGameEvents %|> applyEvents
+    }
+let rec uiLoop () =
+    rwState {
+        clear ()
+        do! showState
+        do! liftCommon clearMessages
+        let! battleOver = checkBattleOver
+        if not battleOver then
+            do! processUI ()
+            do! uiLoop ()
     }
