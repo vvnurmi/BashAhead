@@ -37,7 +37,8 @@ let showState =
     }
 let processUI () =
     rwState {
-        let! userEvents = getUserEvents getCommands getName testPrecondition formatCommand execute
+        let! userCommand = getUserCommand getCommands getName testPrecondition formatCommand
+        let! userEvents = execute userCommand
         do! applyEvents userEvents
         do! getAIEvents %|> applyEvents
         do! getGameEvents %|> applyEvents

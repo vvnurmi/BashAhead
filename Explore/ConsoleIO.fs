@@ -31,7 +31,8 @@ let showState =
     }
 let processUI () =
     rwState {
-        let! userEvents = getUserEvents getCommands getName testPrecondition formatCommand execute
+        let! userCommand = getUserCommand getCommands getName testPrecondition formatCommand
+        let! userEvents = execute userCommand
         do! adapt2 List.iter applyEvent userEvents
     }
 let rec uiLoop () =
