@@ -51,7 +51,6 @@ and formatTable context cellWidths = function
     | [] -> []
 
 // Public interface
-let clear = Console.Clear
 let rec print context elem =
     let printCore fmt =
         setContext fmt.context
@@ -59,12 +58,19 @@ let rec print context elem =
     let fmts = format context elem
     List.iter printCore fmts
     setContext context
+let clear = Console.Clear
+let clearArea c width height =
+    let row = Row [ Str <| new String(' ', width) ]
+    let format = Table <| List.replicate height row
+    print c format
 let getCommand promptFmt =
     let c = { x = 0; y = 20; color = Color.White }
     print c promptFmt
     let width, height = getSize promptFmt
     print { c with x = c.x + width + 1; y = c.y + height - 1 } <| Str ""
-    Console.ReadLine()
+    let input = Console.ReadLine()
+    clearArea c (width + input.Length + 1) height
+    input
 let checkGameOver =
     rState {
         let! gameOver = getGameOver
@@ -78,15 +84,24 @@ let rec getUserInput promptFormat validateInput =
         | Some x -> return x
         | None -> return! getUserInput promptFormat validateInput
     }
-let rec getUserCommand getCommands getName testPrecondition formatCommand =
+let rec getUserCommand getCommands getName testPrecondition formatCommand getParamValues =
     rState {
         let! commands = getCommands
         let! commandOks = adapt2 List.map testPrecondition commands
         let! promptFormat = adapt3 List.map2 formatCommand commands commandOks
         let! okCommands = adapt2 List.filter testPrecondition commands
         let! names = adapt2 List.map getName okCommands
-        let validateInput command = tryFindStart command <| List.zip names okCommands
-        return! Table promptFormat |> getUserInput <| validateInput
+        let validateInput str = tryFindStart str <| List.zip names okCommands
+        let! command = Table promptFormat |> getUserInput <| validateInput
+        let! paramValues = getParamValues command
+        match paramValues with
+        | Some values ->
+            let names = List.map fst values
+            let promptFormat = Table <| List.map (fun v -> Row <| [ Str <| v ]) names
+            let validateInput str = tryFindStart str values
+            let! param = getUserInput promptFormat validateInput
+            return command, [ param ]
+        | None -> return command, []
     }
 
 let formatCreature c =

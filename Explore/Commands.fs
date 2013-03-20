@@ -7,30 +7,27 @@ open State
 
 type Command =
     | Fight
-    | Move of LocationId
+    | Move
     | Common of BashAhead.Common.Commands.Command
 
 let getCommands =
     rState {
         let! locations = getLocations
-        let moveCommands = List.map (fun l -> Move l.id) locations
         let commonCommands = List.map (fun c -> Common c) BashAhead.Common.Commands.commonCommands
-        return Fight :: moveCommands @ commonCommands
+        return Fight :: (Move :: commonCommands)
     }
 let getName command =
     rState {
         match command with
         | Fight -> return "Pick a fight"
-        | Move id ->
-            let! location = getLocation id
-            return sprintf "Go to the %s" location.name
+        | Move -> return "Go to..."
         | Common c -> return BashAhead.Common.Commands.getName c
     }
 let testPrecondition command =
     rState {
         match command with
         | Fight -> return true
-        | Move _ -> return true
+        | Move -> return true
         | Common _ -> return true
     }
 let formatCommand command active =
@@ -39,12 +36,22 @@ let formatCommand command active =
         let! name = getName command
         return Row [ StrColor(name, Color.White); Str "" ]
     }
-let execute command =
+let getParamValues command =
     rState {
+        let! locations = getLocations
         match command with
-        | Fight -> return [ ToBattle ]
-        | Move id -> return [ HeroMoves id ]
-        | Common c ->
-            let commonEvents = BashAhead.Common.Commands.execute c
+        | Move -> return Some <| List.map (fun l -> l.name, l.id) locations
+        | _ -> return None
+    }
+let execute command parameters =
+    rState {
+        match command, parameters with
+        | Fight, [] -> return [ ToBattle ]
+        | Move, [ id ] -> return [ HeroMoves id ]
+        | Common c, p ->
+            let commonEvents = BashAhead.Common.Commands.execute c p
             return List.map (fun e -> Event.Common e) commonEvents
+        | _ ->
+            failwith <| sprintf "Invalid command %O" command
+            return []
     }

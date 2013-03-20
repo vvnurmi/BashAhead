@@ -90,6 +90,11 @@ let formatCommand c active =
             let! explanation = explainPrecondition c
             return Row [ StrColor(getNameRaw c, Color.DarkGray); StrColor(explanation, Color.DarkGray) ]
     }
+let getParamValues command =
+    rState {
+        match command with
+        | _ -> return None
+    }
 
 let gainDistance monsters distance =
     List.map (fun m -> GainDistance(m.id, distance)) monsters
@@ -142,20 +147,23 @@ let attackCapture =
         | AllSurrender | AllFlee -> return [ Captured target.id ]
         | _ -> return []
     }
-let execute command =
+let execute command parameters =
     rState {
         let! hero = liftCommon getHero
         let! monsters = getMonsters
-        match command with
-        | Advance -> return gainDistance monsters -1
-        | BackUp -> return gainDistance monsters 1
-        | Flee -> return [ Fled Hero ]
-        | Leap -> return! attackLeap
-        | Bounce -> return! attackBounce
-        | Capture -> return! attackCapture
-        | Thrust -> return! attackWeakest
-        | Swing -> return! attackSweep
-        | Common c ->
-            let commonEvents = BashAhead.Common.Commands.execute c
+        match command, parameters with
+        | Advance, [] -> return gainDistance monsters -1
+        | BackUp, [] -> return gainDistance monsters 1
+        | Flee, [] -> return [ Fled Hero ]
+        | Leap, [] -> return! attackLeap
+        | Bounce, [] -> return! attackBounce
+        | Capture, [] -> return! attackCapture
+        | Thrust, [] -> return! attackWeakest
+        | Swing, [] -> return! attackSweep
+        | Common c, p ->
+            let commonEvents = BashAhead.Common.Commands.execute c p
             return List.map (fun e -> Event.Common e) commonEvents
+        | c ->
+            failwith <| sprintf "Invalid command %O" c
+            return []
     }

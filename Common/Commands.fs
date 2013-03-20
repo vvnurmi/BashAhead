@@ -14,6 +14,8 @@ let commonCommands =
 let getName = function
     | Wait -> "Wait"
     | Quit -> "Quit"
-let execute = function
-    | Wait -> []
-    | Quit -> [ Event.Quit ]
+let execute command parameters =
+    match command, parameters with
+    | Wait, [] -> []
+    | Quit, [] -> [ Event.Quit ]
+    | x -> failwith <| sprintf "Invalid command %O" x
