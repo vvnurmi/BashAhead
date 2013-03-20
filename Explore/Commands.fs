@@ -10,38 +10,25 @@ type Command =
     | Move
     | Common of BashAhead.Common.Commands.Command
 
-let getCommands =
-    rState {
-        let! locations = getLocations
-        let commonCommands = List.map (fun c -> Common c) BashAhead.Common.Commands.commonCommands
-        return Fight :: (Move :: commonCommands)
-    }
+let commands =
+    let commonCommands = List.map (fun c -> Common c) BashAhead.Common.Commands.commonCommands
+    Fight :: (Move :: commonCommands)
 let getName command =
-    rState {
-        match command with
-        | Fight -> return "Pick a fight"
-        | Move -> return "Go to..."
-        | Common c -> return BashAhead.Common.Commands.getName c
-    }
-let testPrecondition command =
-    rState {
-        match command with
-        | Fight -> return true
-        | Move -> return true
-        | Common _ -> return true
-    }
-let formatCommand command active =
-    assert active
-    rState {
-        let! name = getName command
-        return Row [ StrColor(name, Color.White); Str "" ]
-    }
+    match command with
+    | Fight -> "Pick a fight"
+    | Move -> "Go to..."
+    | Common c -> BashAhead.Common.Commands.getName c
+let formatCommand command =
+    Row [ StrColor(getName command, Color.White) ]
 let getParamValues command =
     rState {
         let! locations = getLocations
         match command with
-        | Move -> return Some <| List.map (fun l -> l.name, l.id) locations
-        | _ -> return None
+        | Move ->
+            let items = Some <| List.map (fun l -> l.name, l.id) locations
+            let promptFormat = Table <| List.map (fun l -> Row [ Str l.name ]) locations
+            return items, promptFormat
+        | _ -> return None, Str ""
     }
 let execute command parameters =
     rState {

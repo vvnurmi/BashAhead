@@ -31,7 +31,9 @@ let showState =
     }
 let processUI () =
     rwState {
-        let! command, parameters = getUserCommand getCommands getName testPrecondition formatCommand getParamValues
+        let promptFormat = Table <| List.map formatCommand commands
+        let namesAndCommands = List.map (fun c -> getName c, c) commands
+        let! command, parameters = getUserCommand namesAndCommands promptFormat getParamValues
         let! userEvents = execute command parameters
         do! adapt2 List.iter applyEvent userEvents
     }

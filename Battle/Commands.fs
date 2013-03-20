@@ -20,7 +20,7 @@ type Command =
     | Flee
     | Common of BashAhead.Common.Commands.Command
 
-let monsterCommands = 
+let commands =
     [
         Advance
         BackUp
@@ -30,16 +30,8 @@ let monsterCommands =
         Flee
         Bounce
         Capture
-    ]
-let getCommands =
-    rState {
-        let! monsters = getMonsters
-        return [
-            yield! monsterCommands
-            yield! List.map (fun c -> Common c) commonCommands
-        ]
-    }
-let getNameRaw = function
+    ] @ List.map (fun c -> Common c) commonCommands
+let getName = function
     | Advance -> "Advance"
     | BackUp -> "Back up"
     | Thrust -> "Thrust"
@@ -49,10 +41,6 @@ let getNameRaw = function
     | Capture -> "Capture"
     | Flee -> "Flee"
     | Common c -> BashAhead.Common.Commands.getName c
-let getName command =
-    rState {
-        return getNameRaw command
-    }
 let explainPrecondition command =
     rState {
         match command with
@@ -82,18 +70,24 @@ let testPrecondition c =
         | Thrust | Swing -> return not monsters.IsEmpty && List.exists (isInRange hero.weaponName) monsters
         | _ -> return true
     }
-let formatCommand c active =
+let getUserInputName c =
     rState {
+        let! active = testPrecondition c
+        return if active then getName c else "\0"
+    }
+let formatCommand c =
+    rState {
+        let! active = testPrecondition c
         if active then
-            return Row [ StrColor(getNameRaw c, Color.White); Str "" ]
+            return Row [ StrColor(getName c, Color.White); Str "" ]
         else
             let! explanation = explainPrecondition c
-            return Row [ StrColor(getNameRaw c, Color.DarkGray); StrColor(explanation, Color.DarkGray) ]
+            return Row [ StrColor(getName c, Color.DarkGray); StrColor(explanation, Color.DarkGray) ]
     }
 let getParamValues command =
     rState {
         match command with
-        | _ -> return None
+        | _ -> return None, Str ""
     }
 
 let gainDistance monsters distance =

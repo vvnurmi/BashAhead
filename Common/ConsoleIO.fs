@@ -84,20 +84,14 @@ let rec getUserInput promptFormat validateInput =
         | Some x -> return x
         | None -> return! getUserInput promptFormat validateInput
     }
-let rec getUserCommand getCommands getName testPrecondition formatCommand getParamValues =
+let rec getUserCommand commands promptFormat getParamValues =
     rState {
-        let! commands = getCommands
-        let! commandOks = adapt2 List.map testPrecondition commands
-        let! promptFormat = adapt3 List.map2 formatCommand commands commandOks
-        let! okCommands = adapt2 List.filter testPrecondition commands
-        let! names = adapt2 List.map getName okCommands
-        let validateInput str = tryFindStart str <| List.zip names okCommands
-        let! command = Table promptFormat |> getUserInput <| validateInput
-        let! paramValues = getParamValues command
+        let validateInput str = tryFindStart str commands
+        let! command = getUserInput promptFormat validateInput
+        let! paramValues, promptFormat = getParamValues command
         match paramValues with
         | Some values ->
             let names = List.map fst values
-            let promptFormat = Table <| List.map (fun v -> Row <| [ Str <| v ]) names
             let validateInput str = tryFindStart str values
             let! param = getUserInput promptFormat validateInput
             return command, [ param ]
