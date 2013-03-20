@@ -39,7 +39,8 @@ let processUI () =
     rwState {
         let namesAndCommands = List.map (fun c -> getName c, c) commands
         let! tableRows = adapt2 List.map formatCommand commands
-        let promptFormat = Table tableRows
+        let question = Row [ StrColor("Choose your action!", Color.Cyan); Str "" ]
+        let promptFormat = Table <| question :: tableRows
         let! command, parameters = getUserCommand namesAndCommands promptFormat getParamValues
         let! userEvents = execute command parameters
         do! applyEvents userEvents

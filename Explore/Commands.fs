@@ -26,7 +26,8 @@ let getParamValues command =
         match command with
         | Move ->
             let items = Some <| List.map (fun l -> l.name, l.id) locations
-            let promptFormat = Table <| List.map (fun l -> Row [ Str l.name ]) locations
+            let question = Row [ StrColor("Go to...?", Color.Cyan) ]
+            let promptFormat = Table <| question :: List.map (fun l -> Row [ Str l.name ]) locations
             return items, promptFormat
         | _ -> return None, Str ""
     }
