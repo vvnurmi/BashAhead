@@ -55,5 +55,5 @@ let rec uiLoop () =
         let! battleOver = getBattleOver
         if not battleOver then
             do! processUI ()
-            do! uiLoop ()
+            return! uiLoop ()
     }

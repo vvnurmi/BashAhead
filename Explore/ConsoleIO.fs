@@ -46,5 +46,5 @@ let rec uiLoop () =
         let! proceed = liftCommon checkGameOver
         if proceed then
             do! processUI ()
-            do! uiLoop ()
+            return! uiLoop ()
     }

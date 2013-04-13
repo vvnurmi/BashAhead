@@ -84,7 +84,7 @@ let rec getUserInput promptFormat validateInput =
         | Some x -> return x
         | None -> return! getUserInput promptFormat validateInput
     }
-let rec getUserCommand commands promptFormat getParamValues =
+let getUserCommand commands promptFormat getParamValues =
     rState {
         let validateInput str = tryFindStart str commands
         let! command = getUserInput promptFormat validateInput

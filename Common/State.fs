@@ -39,7 +39,7 @@ type StateBuilderBase() =
         x.RunOp(g rf, state2)
     member x.Combine(mf, mg) = x.Bind(mf, fun _ -> mg)
     member x.Return(a) = StateOp <| fun state -> a, state
-    member x.ReturnFrom(mf) = StateOp <| fun state -> x.RunOp(mf, state)
+    member x.ReturnFrom(mf) = mf
     member x.Zero() = StateOp <| fun state -> (), state
     member x.For(s, f) = x.Adapt2(Seq.iter, f, s)
     member x.Delay(f) = f ()
